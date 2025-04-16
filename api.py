@@ -573,3 +573,58 @@ class UserManagement(Resource):
                 'status': 'error',
                 'message': f'Error creating user: {str(e)}'
             }, 500 
+
+@api.route('/users/<int:user_id>')
+class UserManagementById(Resource):
+    @no_auth_required
+    @api.expect(api.model('UserUpdate', {
+        'name': fields.String(description='Full name of the user'),
+        'designation': fields.String(description='User designation'),
+        'vehicle_number': fields.String(description='Vehicle registration number'),
+        'location_id': fields.Integer(description='Location ID'),
+        'is_active': fields.Boolean(description='User status')
+    }))
+    @api.doc('update_user')
+    def put(self, user_id):
+        """Update an existing user"""
+        try:
+            data = request.json
+            user = VehicleUser.query.get(user_id)
+            
+            if not user:
+                return {
+                    'status': 'error',
+                    'message': 'User not found'
+                }, 404
+            
+            # Update user details
+            if 'name' in data:
+                user.name = data['name']
+            if 'designation' in data:
+                user.designation = data['designation']
+            if 'vehicle_number' in data:
+                user.vehicle_number = data['vehicle_number']
+            if 'location_id' in data:
+                user.location_id = data['location_id']
+            if 'is_active' in data:
+                user.is_active = data['is_active']
+            
+            db.session.commit()
+            
+            return {
+                'status': 'success',
+                'message': 'User updated successfully',
+                'data': {
+                    'user_id': user.id,
+                    'name': user.name,
+                    'vehicle_number': user.vehicle_number,
+                    'is_active': user.is_active
+                }
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'message': f'Error updating user: {str(e)}'
+            }, 500 

@@ -290,42 +290,160 @@
     </div>
 
     <!-- User Management API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">User Management API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-users me-2"></i>User Management API
+            </h5>
+            <div>
+                <span class="badge bg-primary">POST /api/users</span>
+                <span class="badge bg-success">PUT /api/users/{id}</span>
+            </div>
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <h6>Add User</h6>
-                <button class="btn btn-primary" onclick="testAddUser()">Test Add User</button>
-                <div class="mt-3">
-                    <h6>Sample Request:</h6>
-                    <pre class="bg-light p-3 rounded">
-{
-    "name": "John Doe",
-    "designation": "Employee",
-    "vehicle_number": "KA 01 AB 1234",
-    "fastag_id": "FASTAG123456",
-    "location_id": 1,
-    "kyc_document_type": "Aadhar",
-    "kyc_document_number": "123456789012",
-    "valid_from": "2024-04-01",
-    "valid_to": "2025-03-31",
-    "is_active": true,
-    "access_permissions": [
-        {
-            "lane_id": 1,
-            "start_time": "09:00",
-            "end_time": "18:00",
-            "days_of_week": "1,2,3,4,5"
-        }
-    ]
-}</pre>
+            <!-- Add User Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">Add User</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="userName" value="John Doe">
+                            <label for="userName">Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="userDesignation" value="Employee">
+                            <label for="userDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="vehicleNumber" value="KA 01 AB 1234">
+                            <label for="vehicleNumber">Vehicle Number</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="fastagId" value="FASTAG123456">
+                            <label for="fastagId">Fastag ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="locationId" value="1">
+                            <label for="locationId">Location ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="kycType" value="Aadhar">
+                            <label for="kycType">KYC Document Type</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="kycNumber" value="123456789012">
+                            <label for="kycNumber">KYC Document Number</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="isActive">
+                                <option value="true" selected>Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <label for="isActive">Status</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="validFrom" value="2024-04-01">
+                            <label for="validFrom">Valid From</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="validTo" value="2025-03-31">
+                            <label for="validTo">Valid To</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Access Permissions</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="permissionLaneId" value="1">
+                                <label for="permissionLaneId">Lane ID</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" id="startTime" value="09:00">
+                                <label for="startTime">Start Time</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" id="endTime" value="18:00">
+                                <label for="endTime">End Time</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="daysOfWeek" value="1,2,3,4,5">
+                                <label for="daysOfWeek">Days of Week (1-7)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="testAddUser()">
+                    <i class="fas fa-plus me-2"></i>Test Add User
+                </button>
+                <div class="response-box mt-3">
+                    <h6>Response:</h6>
+                    <div class="json-box" id="addUserResponse"></div>
                 </div>
             </div>
-            <div class="response-box mt-3">
-                <h6>Response:</h6>
-                <div class="json-box" id="addUserResponse"></div>
+
+            <!-- Edit User Section -->
+            <div class="mt-4">
+                <h6 class="mb-3">Edit User</h6>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="editUserId" value="1">
+                            <label for="editUserId">User ID to Edit</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editUserName" value="John Doe Updated">
+                            <label for="editUserName">Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editUserDesignation" value="Senior Employee">
+                            <label for="editUserDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editVehicleNumber" value="KA 01 AB 1234">
+                            <label for="editVehicleNumber">Vehicle Number</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="editLocationId" value="1">
+                            <label for="editLocationId">Location ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="editIsActive">
+                                <option value="true" selected>Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <label for="editIsActive">Status</label>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="testEditUser()">
+                    <i class="fas fa-edit me-2"></i>Test Edit User
+                </button>
+                <div class="response-box mt-3">
+                    <h6>Response:</h6>
+                    <div class="json-box" id="editUserResponse"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -571,22 +689,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function testAddUser() {
     const data = {
-        name: "John Doe",
-        designation: "Employee",
-        vehicle_number: "KA 01 AB 1234",
-        fastag_id: "FASTAG123456",
-        location_id: 1,
-        kyc_document_type: "Aadhar",
-        kyc_document_number: "123456789012",
-        valid_from: "2024-04-01",
-        valid_to: "2025-03-31",
-        is_active: true,
+        name: document.getElementById('userName').value,
+        designation: document.getElementById('userDesignation').value,
+        vehicle_number: document.getElementById('vehicleNumber').value,
+        fastag_id: document.getElementById('fastagId').value,
+        location_id: parseInt(document.getElementById('locationId').value),
+        kyc_document_type: document.getElementById('kycType').value,
+        kyc_document_number: document.getElementById('kycNumber').value,
+        valid_from: document.getElementById('validFrom').value,
+        valid_to: document.getElementById('validTo').value,
+        is_active: document.getElementById('isActive').value === 'true',
         access_permissions: [
             {
-                lane_id: 1,
-                start_time: "09:00",
-                end_time: "18:00",
-                days_of_week: "1,2,3,4,5"
+                lane_id: parseInt(document.getElementById('permissionLaneId').value),
+                start_time: document.getElementById('startTime').value,
+                end_time: document.getElementById('endTime').value,
+                days_of_week: document.getElementById('daysOfWeek').value
             }
         ]
     };
@@ -604,6 +722,32 @@ function testAddUser() {
     })
     .catch(error => {
         document.getElementById('addUserResponse').textContent = 'Error: ' + error.message;
+    });
+}
+
+function testEditUser() {
+    const userId = document.getElementById('editUserId').value;
+    const data = {
+        name: document.getElementById('editUserName').value,
+        designation: document.getElementById('editUserDesignation').value,
+        vehicle_number: document.getElementById('editVehicleNumber').value,
+        location_id: parseInt(document.getElementById('editLocationId').value),
+        is_active: document.getElementById('editIsActive').value === 'true'
+    };
+
+    fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('editUserResponse').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        document.getElementById('editUserResponse').textContent = 'Error: ' + error.message;
     });
 }
 </script>
