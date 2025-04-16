@@ -27,7 +27,7 @@
             </form>
             <div class="response-container">
                 <h6>Response:</h6>
-                <pre class="response-output"></pre>
+                <div class="response-output"></div>
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@
             </form>
             <div class="response-container">
                 <h6>Response:</h6>
-                <pre class="response-output"></pre>
+                <div class="response-output"></div>
             </div>
         </div>
     </div>
@@ -90,7 +90,7 @@
             </form>
             <div class="response-container">
                 <h6>Response:</h6>
-                <pre class="response-output"></pre>
+                <div class="response-output"></div>
             </div>
         </div>
     </div>
@@ -129,7 +129,7 @@
             </form>
             <div class="response-container">
                 <h6>Response:</h6>
-                <pre class="response-output"></pre>
+                <div class="response-output"></div>
             </div>
         </div>
     </div>
@@ -188,6 +188,22 @@
     background-color: #fff3cd;
     color: #856404;
 }
+
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 5px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
 <script>
@@ -200,12 +216,25 @@ document.addEventListener('DOMContentLoaded', function() {
         let responseHtml = `
             <div class="response-header">
                 <span class="response-timestamp">${timestamp}</span>
-                <span class="response-status status-${status}">${status.toUpperCase()}</span>
+                <span class="response-status status-${status}">
+                    ${status === 'pending' ? '<span class="loading-spinner"></span>' : ''}
+                    ${status.toUpperCase()}
+                </span>
             </div>
             <pre>${JSON.stringify(response, null, 2)}</pre>
         `;
         
-        output.innerHTML = responseHtml + output.innerHTML;
+        if (status === 'pending') {
+            output.innerHTML = responseHtml;
+        } else {
+            output.innerHTML = responseHtml + output.innerHTML;
+        }
+    }
+
+    // Helper function to handle API errors
+    function handleError(formId, error) {
+        const errorMessage = error.message || 'An unknown error occurred';
+        handleResponse(formId, { error: errorMessage }, 'error');
     }
 
     // Vehicle Presence API
@@ -228,9 +257,14 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => handleResponse('presenceForm', data, 'success'))
-        .catch(error => handleResponse('presenceForm', { error: error.message }, 'error'));
+        .catch(error => handleError('presenceForm', error));
     });
 
     // ANPR API
@@ -254,9 +288,14 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => handleResponse('anprForm', data, 'success'))
-        .catch(error => handleResponse('anprForm', { error: error.message }, 'error'));
+        .catch(error => handleError('anprForm', error));
     });
 
     // Barrier Control API
@@ -279,9 +318,14 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => handleResponse('barrierForm', data, 'success'))
-        .catch(error => handleResponse('barrierForm', { error: error.message }, 'error'));
+        .catch(error => handleError('barrierForm', error));
     });
 
     // Health Check API
@@ -305,9 +349,14 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
         .then(data => handleResponse('healthForm', data, 'success'))
-        .catch(error => handleResponse('healthForm', { error: error.message }, 'error'));
+        .catch(error => handleError('healthForm', error));
     });
 });
 </script>
