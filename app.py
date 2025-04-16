@@ -1184,4 +1184,4 @@ def internal_error(error):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(host='10.20.1.41', port=5000, debug=True) 
+    app.run(host='0.0.0.0', port=5000, debug=True) 

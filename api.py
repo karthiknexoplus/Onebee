@@ -130,6 +130,18 @@ reset_model = api.model('Reset', {
     'timestamp': fields.DateTime(required=True, description='Reset timestamp')
 })
 
+success_model = api.model('Success', {
+    'status': fields.String(required=True, description='Status of the operation'),
+    'message': fields.String(required=True, description='Message describing the result'),
+    'data': fields.Raw(description='Response data')
+})
+
+def no_auth_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Vehicle detection endpoints
 @vehicle_ns.route('/presence')
 class VehiclePresence(Resource):
@@ -422,4 +434,52 @@ class ResetDevice(Resource):
             }, 200
         except Exception as e:
             db.session.rollback()
-            return {'message': str(e)}, 400 
+            return {'message': str(e)}, 400
+
+@api.route('/lane-device-counts')
+class LaneDeviceCounts(Resource):
+    @no_auth_required
+    @api.doc('get_lane_device_counts')
+    @api.marshal_with(success_model)
+    def get(self):
+        """Get counts of lanes and their associated devices"""
+        try:
+            # Get all lanes
+            lanes = Lane.query.all()
+            
+            # Prepare response data
+            response_data = {
+                'total_lanes': len(lanes),
+                'lanes': []
+            }
+            
+            # For each lane, get its devices
+            for lane in lanes:
+                devices = Device.query.filter_by(lane_id=lane.id).all()
+                lane_data = {
+                    'lane_id': lane.id,
+                    'lane_name': lane.name,
+                    'total_devices': len(devices),
+                    'devices': [
+                        {
+                            'device_id': device.id,
+                            'device_name': device.name,
+                            'device_type': device.device_type,
+                            'status': device.status
+                        }
+                        for device in devices
+                    ]
+                }
+                response_data['lanes'].append(lane_data)
+            
+            return {
+                'status': 'success',
+                'message': 'Lane and device counts retrieved successfully',
+                'data': response_data
+            }
+            
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving lane and device counts: {str(e)}'
+            }, 500 
