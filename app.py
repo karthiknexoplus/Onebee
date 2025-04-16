@@ -1197,6 +1197,10 @@ def get_presence_logs():
         'status': log.status
     } for log in logs])
 
+@app.route('/api-test')
+@login_required
+def api_test():
+    return render_template('api_test.html')
+
 if __name__ == '__main__':
-    app.run(debug=True, host = "10.20.1.41", port = 5000)
-    # app.run(debug=True) 
+    app.run(debug=True) 

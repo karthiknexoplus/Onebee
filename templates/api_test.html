@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>API Testing Interface</h2>
+    
+    <!-- Vehicle Presence API -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Vehicle Presence API</h5>
+        </div>
+        <div class="card-body">
+            <form id="presenceForm" class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Lane ID</label>
+                    <input type="number" class="form-control" name="lane_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Device ID</label>
+                    <input type="number" class="form-control" name="device_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confidence</label>
+                    <input type="number" class="form-control" name="confidence" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Test Vehicle Presence</button>
+            </form>
+            <div class="response-container">
+                <h6>Response:</h6>
+                <pre class="response-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANPR API -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>ANPR API</h5>
+        </div>
+        <div class="card-body">
+            <form id="anprForm" class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Lane ID</label>
+                    <input type="number" class="form-control" name="lane_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Device ID</label>
+                    <input type="number" class="form-control" name="device_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Vehicle Number</label>
+                    <input type="text" class="form-control" name="vehicle_number" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confidence</label>
+                    <input type="number" class="form-control" name="confidence" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Test ANPR</button>
+            </form>
+            <div class="response-container">
+                <h6>Response:</h6>
+                <pre class="response-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barrier Control API -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Barrier Control API</h5>
+        </div>
+        <div class="card-body">
+            <form id="barrierForm" class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Lane ID</label>
+                    <input type="number" class="form-control" name="lane_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Device ID</label>
+                    <input type="number" class="form-control" name="device_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Action</label>
+                    <select class="form-control" name="action" required>
+                        <option value="open">Open</option>
+                        <option value="close">Close</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Test Barrier Control</button>
+            </form>
+            <div class="response-container">
+                <h6>Response:</h6>
+                <pre class="response-output"></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Check API -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Health Check API</h5>
+        </div>
+        <div class="card-body">
+            <form id="healthForm" class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label">Lane ID</label>
+                    <input type="number" class="form-control" name="lane_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Device ID</label>
+                    <input type="number" class="form-control" name="device_id" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Device Type</label>
+                    <select class="form-control" name="device_type" required>
+                        <option value="sensor">Sensor</option>
+                        <option value="camera">Camera</option>
+                        <option value="barrier">Barrier</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Test Health Check</button>
+            </form>
+            <div class="response-container">
+                <h6>Response:</h6>
+                <pre class="response-output"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Helper function to handle API responses
+    function handleResponse(formId, response) {
+        const output = document.querySelector(`#${formId} .response-output`);
+        output.textContent = JSON.stringify(response, null, 2);
+    }
+
+    // Vehicle Presence API
+    document.getElementById('presenceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            confidence: parseFloat(formData.get('confidence')),
+            timestamp: new Date().toISOString()
+        };
+
+        fetch('/api/vehicle/presence', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => handleResponse('presenceForm', data))
+        .catch(error => handleResponse('presenceForm', { error: error.message }));
+    });
+
+    // ANPR API
+    document.getElementById('anprForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            vehicle_number: formData.get('vehicle_number'),
+            confidence: parseFloat(formData.get('confidence')),
+            timestamp: new Date().toISOString()
+        };
+
+        fetch('/api/vehicle/anpr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => handleResponse('anprForm', data))
+        .catch(error => handleResponse('anprForm', { error: error.message }));
+    });
+
+    // Barrier Control API
+    document.getElementById('barrierForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            action: formData.get('action'),
+            timestamp: new Date().toISOString()
+        };
+
+        fetch('/api/barrier/control', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => handleResponse('barrierForm', data))
+        .catch(error => handleResponse('barrierForm', { error: error.message }));
+    });
+
+    // Health Check API
+    document.getElementById('healthForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            device_type: formData.get('device_type'),
+            status: formData.get('status'),
+            last_heartbeat: new Date().toISOString()
+        };
+
+        fetch('/api/health/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => handleResponse('healthForm', data))
+        .catch(error => handleResponse('healthForm', { error: error.message }));
+    });
+});
+</script>
+
+<style>
+.response-container {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.response-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+}
+</style>
+{% endblock %} 
