@@ -3,9 +3,17 @@ from flask_restx import Api, Resource, fields
 from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog
 from datetime import datetime
 import json
+from functools import wraps
+from flask_login import current_user
 
 # Create Blueprint
 api_bp = Blueprint('api', __name__)
+
+# Disable CSRF for API routes
+@api_bp.before_request
+def disable_csrf():
+    pass
+
 api = Api(api_bp, 
     version='1.0', 
     title='Access Control API',

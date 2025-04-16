@@ -13,6 +13,7 @@ import csv
 import random
 import string
 from api import api_bp  # Import the API blueprint
+from flask_wtf.csrf import CSRFProtect
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +23,16 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///access_control.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # Disable CSRF by default
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Enable CSRF protection for all routes except API routes
+@csrf.exempt
+@api_bp.before_request
+def disable_csrf():
+    pass
 
 # Register the API blueprint
 app.register_blueprint(api_bp, url_prefix='/api')
