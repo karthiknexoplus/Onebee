@@ -135,12 +135,77 @@
     </div>
 </div>
 
+<style>
+.response-container {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    border: 1px solid #dee2e6;
+}
+
+.response-output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.response-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.response-timestamp {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.response-status {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Helper function to handle API responses
-    function handleResponse(formId, response) {
+    function handleResponse(formId, response, status = 'success') {
         const output = document.querySelector(`#${formId} .response-output`);
-        output.textContent = JSON.stringify(response, null, 2);
+        const timestamp = new Date().toLocaleString();
+        
+        let responseHtml = `
+            <div class="response-header">
+                <span class="response-timestamp">${timestamp}</span>
+                <span class="response-status status-${status}">${status.toUpperCase()}</span>
+            </div>
+            <pre>${JSON.stringify(response, null, 2)}</pre>
+        `;
+        
+        output.innerHTML = responseHtml + output.innerHTML;
     }
 
     // Vehicle Presence API
@@ -154,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function() {
             timestamp: new Date().toISOString()
         };
 
+        handleResponse('presenceForm', { request: data }, 'pending');
+
         fetch('/api/vehicle/presence', {
             method: 'POST',
             headers: {
@@ -162,8 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         })
         .then(response => response.json())
-        .then(data => handleResponse('presenceForm', data))
-        .catch(error => handleResponse('presenceForm', { error: error.message }));
+        .then(data => handleResponse('presenceForm', data, 'success'))
+        .catch(error => handleResponse('presenceForm', { error: error.message }, 'error'));
     });
 
     // ANPR API
@@ -178,6 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
             timestamp: new Date().toISOString()
         };
 
+        handleResponse('anprForm', { request: data }, 'pending');
+
         fetch('/api/vehicle/anpr', {
             method: 'POST',
             headers: {
@@ -186,8 +255,8 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         })
         .then(response => response.json())
-        .then(data => handleResponse('anprForm', data))
-        .catch(error => handleResponse('anprForm', { error: error.message }));
+        .then(data => handleResponse('anprForm', data, 'success'))
+        .catch(error => handleResponse('anprForm', { error: error.message }, 'error'));
     });
 
     // Barrier Control API
@@ -201,6 +270,8 @@ document.addEventListener('DOMContentLoaded', function() {
             timestamp: new Date().toISOString()
         };
 
+        handleResponse('barrierForm', { request: data }, 'pending');
+
         fetch('/api/barrier/control', {
             method: 'POST',
             headers: {
@@ -209,8 +280,8 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         })
         .then(response => response.json())
-        .then(data => handleResponse('barrierForm', data))
-        .catch(error => handleResponse('barrierForm', { error: error.message }));
+        .then(data => handleResponse('barrierForm', data, 'success'))
+        .catch(error => handleResponse('barrierForm', { error: error.message }, 'error'));
     });
 
     // Health Check API
@@ -225,6 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
             last_heartbeat: new Date().toISOString()
         };
 
+        handleResponse('healthForm', { request: data }, 'pending');
+
         fetch('/api/health/check', {
             method: 'POST',
             headers: {
@@ -233,24 +306,9 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify(data)
         })
         .then(response => response.json())
-        .then(data => handleResponse('healthForm', data))
-        .catch(error => handleResponse('healthForm', { error: error.message }));
+        .then(data => handleResponse('healthForm', data, 'success'))
+        .catch(error => handleResponse('healthForm', { error: error.message }, 'error'));
     });
 });
 </script>
-
-<style>
-.response-container {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-}
-
-.response-output {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    margin: 0;
-}
-</style>
 {% endblock %} 
