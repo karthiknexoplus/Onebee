@@ -13,7 +13,6 @@ import csv
 import random
 import string
 from api import api_bp  # Import the API blueprint
-from flask_wtf.csrf import CSRFProtect
 
 # Load environment variables
 load_dotenv()
@@ -23,18 +22,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///access_control.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['WTF_CSRF_CHECK_DEFAULT'] = False  # Disable CSRF by default
 
-# Initialize CSRF protection
-csrf = CSRFProtect(app)
-
-# Enable CSRF protection for all routes except API routes
-@csrf.exempt
-@api_bp.before_request
-def disable_csrf():
-    pass
-
-# Register the API blueprint
+# Register API blueprint
 app.register_blueprint(api_bp, url_prefix='/api')
 
 # Initialize database
@@ -885,183 +874,96 @@ def generate_random_vehicle_number():
     states = ['KA', 'MH', 'TN', 'AP', 'KL', 'DL', 'UP', 'GJ']
     return f"{random.choice(states)} {random.randint(10, 99)} {random.choice(string.ascii_uppercase)}{random.choice(string.ascii_uppercase)} {random.randint(1000, 9999)}"
 
-@app.route('/generate_test_data/<type>', methods=['POST'])
+@app.route('/generate_test_data/<data_type>', methods=['POST'])
 @login_required
-def generate_test_data(type):
+def generate_test_data(data_type):
     try:
-        count = int(request.form.get('count', 5))
-        
-        if type == 'locations':
-            # Generate test locations
-            locations = [
-                Location(
-                    name=f'Test Location {i+1}',
-                    address=f'Test Address {i+1}, City {i+1}',
-                    is_active=True
-                ) for i in range(count)
-            ]
-            db.session.add_all(locations)
-            db.session.commit()
-            flash(f'Successfully generated {count} test locations')
-            
-        elif type == 'lanes':
-            # Get all locations
-            locations = Location.query.all()
-            if not locations:
-                flash('Please generate locations first', 'error')
-                return redirect(url_for('index'))
-            
-            # Generate test lanes for each location
-            for location in locations:
-                lanes = []
-                for i in range(count):
-                    lane = Lane(
-                        name=f'{location.name} Lane {i+1}',
-                        lane_type='entry' if i % 2 == 0 else 'exit',
-                        status='active',
-                        location_id=location.id
-                    )
-                    lanes.append(lane)
-                    
-                    # Add devices for each lane
-                    anpr = Device(
-                        name=f'ANPR Camera {i+1}',
-                        device_type='anpr_camera',
-                        ip_address=f'192.168.1.{100+i}',
-                        port=8000+i,
-                        status='active',
-                        lane=lane
-                    )
-                    fastag = Device(
-                        name=f'Fastag Reader {i+1}',
-                        device_type='fastag_reader',
-                        ip_address=f'192.168.1.{200+i}',
-                        port=9000+i,
-                        status='active',
-                        lane=lane
-                    )
-                    controller = Device(
-                        name=f'Gate Controller {i+1}',
-                        device_type='gate_controller',
-                        ip_address=f'192.168.1.{300+i}',
-                        port=7000+i,
-                        status='active',
-                        lane=lane
-                    )
-                    db.session.add_all([anpr, fastag, controller])
-                
-                db.session.add_all(lanes)
-            
-            db.session.commit()
-            flash(f'Successfully generated {count} test lanes with devices for each location')
-            
-        elif type == 'vehicle_users':
-            # Get all locations for assigning users
-            locations = Location.query.all()
-            if not locations:
-                flash('Please generate locations first', 'error')
-                return redirect(url_for('index'))
-            
-            # Generate test vehicle users
-            users = []
-            for i in range(count):
-                # Generate a random vehicle number based on location state
-                location = random.choice(locations)
-                state_code = 'KA' if location.name.startswith('Test Location 1') else 'MH' if location.name.startswith('Test Location 2') else 'TN'
-                vehicle_number = f'{state_code}{random.randint(1, 99):02d}{random.choice(["AB", "CD", "EF"])}{random.randint(1000, 9999)}'
-                
-                user = VehicleUser(
-                    name=f'Test User {i+1}',
-                    vehicle_number=vehicle_number,
-                    fastag_id=f'FASTAG{i+1:04d}',
-                    location_id=location.id,
-                    valid_from=datetime.now(),
-                    valid_to=datetime.now() + timedelta(days=365),
-                    is_active=True
-                )
-                users.append(user)
-            
-            db.session.add_all(users)
-            db.session.commit()
-            
-            # Generate access permissions for each user
-            lanes = Lane.query.all()
-            if lanes:
-                for user in users:
-                    # Assign random lanes to each user
-                    user_lanes = random.sample(lanes, min(3, len(lanes)))
-                    for lane in user_lanes:
-                        permission = UserAccessPermission(
-                            user_id=user.id,
-                            lane_id=lane.id,
-                            start_time=datetime.strptime('00:00', '%H:%M').time(),
-                            end_time=datetime.strptime('23:59', '%H:%M').time(),
-                            days_of_week='monday,tuesday,wednesday,thursday,friday,saturday,sunday'
-                        )
-                        db.session.add(permission)
-                db.session.commit()
-            
-            flash(f'Successfully generated {count} test vehicle users with access permissions')
-            
-        elif type == 'access_logs':
-            # Get all vehicles and lanes
-            vehicles = VehicleUser.query.all()
-            lanes = Lane.query.all()
-            
-            if not vehicles:
-                flash('Please generate vehicle users first', 'error')
-                return redirect(url_for('index'))
-            
-            if not lanes:
-                flash('Please generate lanes first', 'error')
-                return redirect(url_for('index'))
-            
-            # Generate test access logs
-            logs = []
-            for i in range(count):
-                vehicle = random.choice(vehicles)
-                lane = random.choice(lanes)
-                
-                # Generate a random time in the last 30 days
-                random_days = random.randint(0, 30)
-                random_hours = random.randint(0, 23)
-                random_minutes = random.randint(0, 59)
-                access_time = datetime.now() - timedelta(
-                    days=random_days,
-                    hours=random_hours,
-                    minutes=random_minutes
-                )
-                
-                # Check if user has permission for this lane
-                has_permission = UserAccessPermission.query.filter_by(
-                    user_id=vehicle.id,
-                    lane_id=lane.id
-                ).first()
-                
-                # 90% success rate for authorized users
-                status = 'granted' if has_permission and random.random() < 0.9 else 'denied'
-                
-                log = AccessLog(
-                    vehicle_user=vehicle,
-                    lane=lane,
-                    device=random.choice(lane.devices),
-                    access_time=access_time,
-                    status=status
-                )
-                logs.append(log)
-            
-            db.session.add_all(logs)
-            db.session.commit()
-            flash(f'Successfully generated {count} test access logs')
-            
+        # Get count from either form data or JSON
+        if request.is_json:
+            data = request.get_json()
+            count = int(data.get('count', 5))
         else:
-            flash('Invalid test data type', 'error')
+            count = int(request.form.get('count', 5))
             
+        if count < 1 or count > 10:
+            return jsonify({'error': 'Count must be between 1 and 10'}), 400
+
+        if data_type == 'locations':
+            # Generate test locations
+            locations = []
+            for i in range(count):
+                location = Location(
+                    name=f'Test Location {i+1}',
+                    address=f'Test Address {i+1}',
+                    city='Test City',
+                    state='Test State',
+                    country='Test Country',
+                    postal_code='12345',
+                    created_at=datetime.utcnow()
+                )
+                db.session.add(location)
+                locations.append({
+                    'id': location.id,
+                    'name': location.name,
+                    'address': location.address
+                })
+            db.session.commit()
+            return jsonify({'message': f'Generated {count} test locations', 'data': locations})
+
+        elif data_type == 'lanes':
+            # Generate test lanes
+            location = Location.query.first()
+            if not location:
+                return jsonify({'error': 'No locations found. Please generate locations first.'}), 400
+
+            lanes = []
+            for i in range(count):
+                lane = Lane(
+                    location_id=location.id,
+                    name=f'Test Lane {i+1}',
+                    lane_type='entry',
+                    status='active',
+                    created_at=datetime.utcnow()
+                )
+                db.session.add(lane)
+                lanes.append({
+                    'id': lane.id,
+                    'name': lane.name,
+                    'location_id': lane.location_id
+                })
+            db.session.commit()
+            return jsonify({'message': f'Generated {count} test lanes', 'data': lanes})
+
+        elif data_type == 'devices':
+            # Generate test devices
+            lane = Lane.query.first()
+            if not lane:
+                return jsonify({'error': 'No lanes found. Please generate lanes first.'}), 400
+
+            devices = []
+            for i in range(count):
+                device = Device(
+                    lane_id=lane.id,
+                    name=f'Test Device {i+1}',
+                    device_type='sensor',
+                    status='active',
+                    created_at=datetime.utcnow()
+                )
+                db.session.add(device)
+                devices.append({
+                    'id': device.id,
+                    'name': device.name,
+                    'lane_id': device.lane_id
+                })
+            db.session.commit()
+            return jsonify({'message': f'Generated {count} test devices', 'data': devices})
+
+        else:
+            return jsonify({'error': 'Invalid data type'}), 400
+
     except Exception as e:
         db.session.rollback()
-        flash(f'Error generating test data: {str(e)}', 'error')
-        
-    return redirect(url_for('index'))
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/clear_test_data', methods=['POST'])
 @login_required
@@ -1208,10 +1110,43 @@ def get_presence_logs():
         'status': log.status
     } for log in logs])
 
+@app.route('/debug/db')
+@login_required
+def debug_db():
+    lanes = Lane.query.all()
+    devices = Device.query.all()
+    return jsonify({
+        'lanes': [{'id': lane.id, 'name': lane.name} for lane in lanes],
+        'devices': [{'id': device.id, 'name': device.name, 'lane_id': device.lane_id} for device in devices]
+    })
+
 @app.route('/api-test')
 @login_required
 def api_test():
     return render_template('api_test.html')
 
+# Error handlers
+@app.errorhandler(400)
+def bad_request_error(error):
+    if request.is_json:
+        return jsonify({'error': 'Bad Request', 'message': str(error)}), 400
+    flash('Bad Request: ' + str(error))
+    return redirect(url_for('index'))
+
+@app.errorhandler(404)
+def not_found_error(error):
+    if request.is_json:
+        return jsonify({'error': 'Not Found', 'message': 'The requested resource was not found'}), 404
+    flash('Resource not found')
+    return redirect(url_for('index'))
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    if request.is_json:
+        return jsonify({'error': 'Internal Server Error', 'message': 'An unexpected error occurred'}), 500
+    flash('An unexpected error occurred')
+    return redirect(url_for('index'))
+
 if __name__ == '__main__':
-    app.run(debug=True, host="10.20.1.41", port=5000) 
+    app.run(debug=True, host="127.0.0.1", port=5000) 

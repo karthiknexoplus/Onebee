@@ -1,489 +1,502 @@
 {% extends "base.html" %}
 
+{% block title %}API Test - Access Control{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">API Testing Interface</h2>
-    
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">API Test Interface</h2>
+        <div class="api-status">
+            <span class="status-indicator active"></span>
+            <span class="status-text">API Server Online</span>
+        </div>
+    </div>
+
+    <div class="alert alert-info mb-4">
+        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>How to Use</h5>
+        <p class="mb-0">Fill in the form fields with the required data and click the "Test" button to send the request. The response will be displayed in the response box below each form.</p>
+    </div>
+
     <!-- Vehicle Presence API -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Vehicle Presence API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-car me-2"></i>Vehicle Presence API
+            </h5>
+            <span class="badge bg-primary">POST /api/vehicle/presence</span>
         </div>
         <div class="card-body">
-            <form id="presenceForm" class="mb-3">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Lane ID</label>
-                            <input type="number" class="form-control" name="lane_id" required>
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 101,
+    "confidence": 95.5,
+    "status": "active",
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="vehiclePresenceForm" class="api-form">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="laneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="laneId">Lane ID</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Device ID</label>
-                            <input type="number" class="form-control" name="device_id" required>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="deviceId" name="device_id" placeholder="Device ID" value="101" required>
+                            <label for="deviceId">Device ID</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Confidence</label>
-                            <input type="number" class="form-control" name="confidence" step="0.01" required>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="confidence" name="confidence" min="0" max="100" placeholder="Confidence" value="95.5" required>
+                            <label for="confidence">Confidence</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="active" selected>Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <label for="status">Status</label>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-play me-2"></i>Test Vehicle Presence
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test Vehicle Presence API
+                    </button>
+                </div>
             </form>
-            <div class="progress mb-3 d-none">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-            </div>
-            <div class="response-container">
-                <div class="response-output"></div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="vehiclePresenceResponse"></div>
             </div>
         </div>
     </div>
 
     <!-- ANPR API -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">ANPR API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-camera me-2"></i>ANPR API
+            </h5>
+            <span class="badge bg-primary">POST /api/vehicle/anpr</span>
         </div>
         <div class="card-body">
-            <form id="anprForm" class="mb-3">
-                <div class="row">
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 102,
+    "vehicle_number": "ABC123",
+    "confidence": 98.2,
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="anprForm" class="api-form">
+                <div class="row g-3">
                     <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Lane ID</label>
-                            <input type="number" class="form-control" name="lane_id" required>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="anprLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="anprLaneId">Lane ID</label>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Device ID</label>
-                            <input type="number" class="form-control" name="device_id" required>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="anprDeviceId" name="device_id" placeholder="Device ID" value="102" required>
+                            <label for="anprDeviceId">Device ID</label>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Vehicle Number</label>
-                            <input type="text" class="form-control" name="vehicle_number" required>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number" placeholder="Vehicle Number" value="ABC123" required>
+                            <label for="vehicleNumber">Vehicle Number</label>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Confidence</label>
-                            <input type="number" class="form-control" name="confidence" step="0.01" required>
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="anprConfidence" name="confidence" min="0" max="100" placeholder="Confidence" value="98.2" required>
+                            <label for="anprConfidence">Confidence</label>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-camera me-2"></i>Test ANPR
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test ANPR API
+                    </button>
+                </div>
             </form>
-            <div class="progress mb-3 d-none">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-            </div>
-            <div class="response-container">
-                <div class="response-output"></div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="anprResponse"></div>
             </div>
         </div>
     </div>
 
     <!-- Barrier Control API -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0">Barrier Control API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-door-open me-2"></i>Barrier Control API
+            </h5>
+            <span class="badge bg-primary">POST /api/barrier/control</span>
         </div>
         <div class="card-body">
-            <form id="barrierForm" class="mb-3">
-                <div class="row">
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 103,
+    "action": "open",
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="barrierControlForm" class="api-form">
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Lane ID</label>
-                            <input type="number" class="form-control" name="lane_id" required>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="barrierLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="barrierLaneId">Lane ID</label>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Device ID</label>
-                            <input type="number" class="form-control" name="device_id" required>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="barrierDeviceId" name="device_id" placeholder="Device ID" value="103" required>
+                            <label for="barrierDeviceId">Device ID</label>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">Action</label>
-                            <select class="form-control" name="action" required>
-                                <option value="open">Open</option>
+                        <div class="form-floating">
+                            <select class="form-select" id="action" name="action" required>
+                                <option value="open" selected>Open</option>
                                 <option value="close">Close</option>
                             </select>
+                            <label for="action">Action</label>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-warning">
-                    <i class="fas fa-door-open me-2"></i>Test Barrier Control
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test Barrier Control API
+                    </button>
+                </div>
             </form>
-            <div class="progress mb-3 d-none">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-            </div>
-            <div class="response-container">
-                <div class="response-output"></div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="barrierControlResponse"></div>
             </div>
         </div>
     </div>
 
     <!-- Health Check API -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">Health Check API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-heartbeat me-2"></i>Health Check API
+            </h5>
+            <span class="badge bg-primary">POST /api/health/check</span>
         </div>
         <div class="card-body">
-            <form id="healthForm" class="mb-3">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Lane ID</label>
-                            <input type="number" class="form-control" name="lane_id" required>
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 104,
+    "device_type": "sensor",
+    "status": "healthy",
+    "last_heartbeat": "2024-04-16T15:30:00Z",
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="healthCheckForm" class="api-form">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="healthLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="healthLaneId">Lane ID</label>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Device ID</label>
-                            <input type="number" class="form-control" name="device_id" required>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="healthDeviceId" name="device_id" placeholder="Device ID" value="104" required>
+                            <label for="healthDeviceId">Device ID</label>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Device Type</label>
-                            <select class="form-control" name="device_type" required>
-                                <option value="sensor">Sensor</option>
-                                <option value="camera">Camera</option>
-                                <option value="barrier">Barrier</option>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select class="form-select" id="healthStatus" name="status" required>
+                                <option value="healthy" selected>Healthy</option>
+                                <option value="unhealthy">Unhealthy</option>
                             </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-control" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
+                            <label for="healthStatus">Status</label>
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-info text-white">
-                    <i class="fas fa-heartbeat me-2"></i>Test Health Check
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test Health Check API
+                    </button>
+                </div>
             </form>
-            <div class="progress mb-3 d-none">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
-            </div>
-            <div class="response-container">
-                <div class="response-output"></div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="healthCheckResponse"></div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-.response-container {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    margin-top: 10px;
-    border: 1px solid #dee2e6;
-    min-height: 100px;
-    max-height: 300px;
-    overflow-y: auto;
+.api-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
-.response-output {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    margin: 0;
-    font-family: 'Fira Code', monospace;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.response-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.response-timestamp {
-    font-size: 12px;
-    color: #6c757d;
-}
-
-.response-status {
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.status-success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-error {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.status-pending {
-    background-color: #fff3cd;
-    color: #856404;
-}
-
-.loading-spinner {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 5px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.card {
-    transition: transform 0.2s;
-}
-
-.card:hover {
+.api-card:hover {
     transform: translateY(-2px);
 }
 
-.btn {
-    transition: all 0.2s;
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 1rem 1.5rem;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.form-floating {
+    margin-bottom: 0;
 }
 
-.form-control:focus {
-    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
-    border-color: #86b7fe;
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
 }
 
-/* Custom scrollbar for response container */
-.response-container::-webkit-scrollbar {
-    width: 8px;
+.form-floating > label {
+    padding: 1rem 0.75rem;
 }
 
-.response-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
+.response-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
 }
 
-.response-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+.response-header {
+    margin-bottom: 0.5rem;
 }
 
-.response-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Response animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.response-item {
-    animation: fadeIn 0.3s ease-out;
-    margin-bottom: 15px;
-    padding: 10px;
-    border-radius: 5px;
+.response-box {
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
 }
 
-/* Progress bar animation */
-.progress {
-    height: 4px;
-    margin-bottom: 15px;
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background-color: #6c757d;
 }
 
-.progress-bar {
-    transition: width 0.3s ease;
+.status-indicator.active {
+    background-color: #28a745;
+}
+
+.status-indicator.pending {
+    background-color: #ffc107;
+    animation: pulse 1.5s infinite;
+}
+
+.status-indicator.error {
+    background-color: #dc3545;
+}
+
+.status-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.btn-primary {
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+}
+
+.alert-secondary pre {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Helper function to handle API responses
-    function handleResponse(formId, response, status = 'success') {
-        const output = document.querySelector(`#${formId} .response-output`);
-        const progress = document.querySelector(`#${formId} .progress`);
-        const timestamp = new Date().toLocaleString();
+    // Helper function to update response status
+    function updateResponseStatus(element, status) {
+        const indicator = element.querySelector('.status-indicator');
+        const text = element.querySelector('.status-text');
         
-        let responseHtml = `
-            <div class="response-item">
-                <div class="response-header">
-                    <span class="response-timestamp">${timestamp}</span>
-                    <span class="response-status status-${status}">
-                        ${status === 'pending' ? '<span class="loading-spinner"></span>' : ''}
-                        ${status.toUpperCase()}
-                    </span>
-                </div>
-                <pre>${JSON.stringify(response, null, 2)}</pre>
-            </div>
-        `;
+        indicator.className = 'status-indicator';
+        text.textContent = status;
         
-        if (status === 'pending') {
-            progress.classList.remove('d-none');
-            output.innerHTML = responseHtml;
-        } else {
-            progress.classList.add('d-none');
-            output.innerHTML = responseHtml + output.innerHTML;
+        switch(status) {
+            case 'Pending':
+                indicator.classList.add('pending');
+                break;
+            case 'Success':
+                indicator.classList.add('active');
+                break;
+            case 'Error':
+                indicator.classList.add('error');
+                break;
+            default:
+                indicator.classList.add('active');
         }
     }
 
-    // Helper function to handle API errors
-    function handleError(formId, error) {
-        const errorMessage = error.message || 'An unknown error occurred';
-        handleResponse(formId, { error: errorMessage }, 'error');
+    // Helper function to handle API requests
+    async function handleApiRequest(form, endpoint, responseElement) {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'lane_id' || key === 'device_id') {
+                data[key] = parseInt(value);
+            } else if (key === 'confidence') {
+                data[key] = parseFloat(value);
+            } else {
+                data[key] = value;
+            }
+        });
+        data.timestamp = new Date().toISOString();
+
+        if (endpoint.includes('health')) {
+            data.device_type = 'sensor';
+            data.last_heartbeat = new Date().toISOString();
+        }
+
+        const statusElement = responseElement.parentElement.querySelector('.response-status');
+        updateResponseStatus(statusElement, 'Pending');
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            responseElement.textContent = JSON.stringify(result, null, 2);
+            updateResponseStatus(statusElement, 'Success');
+        } catch (error) {
+            responseElement.textContent = 'Error: ' + error.message;
+            updateResponseStatus(statusElement, 'Error');
+        }
     }
 
     // Vehicle Presence API
-    document.getElementById('presenceForm').addEventListener('submit', function(e) {
+    document.getElementById('vehiclePresenceForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            confidence: parseFloat(formData.get('confidence')),
-            timestamp: new Date().toISOString()
-        };
-
-        handleResponse('presenceForm', { request: data }, 'pending');
-
-        fetch('/api/vehicle/presence', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
-            }
-            return response.json();
-        })
-        .then(data => handleResponse('presenceForm', data, 'success'))
-        .catch(error => handleError('presenceForm', error));
+        handleApiRequest(
+            this,
+            '/api/vehicle/presence',
+            document.getElementById('vehiclePresenceResponse')
+        );
     });
 
     // ANPR API
     document.getElementById('anprForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            vehicle_number: formData.get('vehicle_number'),
-            confidence: parseFloat(formData.get('confidence')),
-            timestamp: new Date().toISOString()
-        };
-
-        handleResponse('anprForm', { request: data }, 'pending');
-
-        fetch('/api/vehicle/anpr', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
-            }
-            return response.json();
-        })
-        .then(data => handleResponse('anprForm', data, 'success'))
-        .catch(error => handleError('anprForm', error));
+        handleApiRequest(
+            this,
+            '/api/vehicle/anpr',
+            document.getElementById('anprResponse')
+        );
     });
 
     // Barrier Control API
-    document.getElementById('barrierForm').addEventListener('submit', function(e) {
+    document.getElementById('barrierControlForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            action: formData.get('action'),
-            timestamp: new Date().toISOString()
-        };
-
-        handleResponse('barrierForm', { request: data }, 'pending');
-
-        fetch('/api/barrier/control', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
-            }
-            return response.json();
-        })
-        .then(data => handleResponse('barrierForm', data, 'success'))
-        .catch(error => handleError('barrierForm', error));
+        handleApiRequest(
+            this,
+            '/api/barrier/control',
+            document.getElementById('barrierControlResponse')
+        );
     });
 
     // Health Check API
-    document.getElementById('healthForm').addEventListener('submit', function(e) {
+    document.getElementById('healthCheckForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            device_type: formData.get('device_type'),
-            status: formData.get('status'),
-            last_heartbeat: new Date().toISOString()
-        };
-
-        handleResponse('healthForm', { request: data }, 'pending');
-
-        fetch('/api/health/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
-            }
-            return response.json();
-        })
-        .then(data => handleResponse('healthForm', data, 'success'))
-        .catch(error => handleError('healthForm', error));
+        handleApiRequest(
+            this,
+            '/api/health/check',
+            document.getElementById('healthCheckResponse')
+        );
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}

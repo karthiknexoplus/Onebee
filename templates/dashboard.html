@@ -175,7 +175,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Locations</h6>
                                     <p class="card-text">Generate test locations with addresses</p>
-                                    <form action="{{ url_for('generate_test_data', type='locations') }}" method="POST">
+                                    <form action="{{ url_for('generate_test_data', data_type='locations') }}" method="POST">
                                         <div class="mb-3">
                                             <label for="locationCount" class="form-label">Number of Locations</label>
                                             <input type="number" class="form-control" id="locationCount" name="count" value="2" min="1" max="10">
@@ -190,7 +190,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Lanes</h6>
                                     <p class="card-text">Generate test lanes with devices</p>
-                                    <form action="{{ url_for('generate_test_data', type='lanes') }}" method="POST">
+                                    <form action="{{ url_for('generate_test_data', data_type='lanes') }}" method="POST">
                                         <div class="mb-3">
                                             <label for="laneCount" class="form-label">Number of Lanes</label>
                                             <input type="number" class="form-control" id="laneCount" name="count" value="3" min="1" max="10">
@@ -214,7 +214,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Vehicle Users</h6>
                                     <p class="card-text">Generate test vehicle users with random data</p>
-                                    <form action="{{ url_for('generate_test_data', type='vehicle_users') }}" method="POST">
+                                    <form action="{{ url_for('generate_test_data', data_type='vehicle_users') }}" method="POST">
                                         <div class="mb-3">
                                             <label for="userCount" class="form-label">Number of Users</label>
                                             <input type="number" class="form-control" id="userCount" name="count" value="5" min="1" max="50">
@@ -229,7 +229,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Access Logs</h6>
                                     <p class="card-text">Generate test access logs</p>
-                                    <form action="{{ url_for('generate_test_data', type='access_logs') }}" method="POST">
+                                    <form action="{{ url_for('generate_test_data', data_type='access_logs') }}" method="POST">
                                         <div class="mb-3">
                                             <label for="logCount" class="form-label">Number of Logs</label>
                                             <input type="number" class="form-control" id="logCount" name="count" value="20" min="1" max="100">
