@@ -514,6 +514,19 @@ class UserManagement(Resource):
         try:
             data = request.json
             
+            # Check if user with same fastag_id already exists
+            existing_user = VehicleUser.query.filter_by(fastag_id=data['fastag_id']).first()
+            if existing_user:
+                return {
+                    'status': 'error',
+                    'message': 'User with this Fastag ID already exists',
+                    'data': {
+                        'user_id': existing_user.id,
+                        'name': existing_user.name,
+                        'vehicle_number': existing_user.vehicle_number
+                    }
+                }, 409  # 409 Conflict
+            
             # Create new user
             user = VehicleUser(
                 name=data['name'],
