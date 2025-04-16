@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, Response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Lane, Device, Location, VehicleUser, UserAccessPermission, AccessLog, PresenceLog, BarrierLog
+from models import db, User, Lane, Device, Location, VehicleUser, UserAccessPermission, AccessLog, PresenceLog, BarrierLog, AuditLog
 import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -161,13 +161,16 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         user = User.query.filter_by(username=username).first()
+        
         if user and check_password_hash(user.password, password):
             login_user(user)
+            log_audit('User login', f'User {username} logged in successfully')
             return redirect(url_for('index'))
-        
-        flash('Invalid username or password')
+        else:
+            log_audit('Failed login attempt', f'Failed login attempt for username: {username}')
+            flash('Invalid username or password', 'error')
+    
     return render_template('login.html')
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -209,6 +212,7 @@ def signup():
 @app.route('/logout')
 @login_required
 def logout():
+    log_audit('User logout', f'User {current_user.username} logged out')
     logout_user()
     return redirect(url_for('login'))
 
@@ -381,50 +385,22 @@ def user_manual():
 @app.route('/users/add', methods=['POST'])
 @login_required
 def add_user():
-    # Create new user
-    user = VehicleUser(
-        name=request.form.get('name'),
-        designation=request.form.get('designation'),
-        vehicle_number=request.form.get('vehicle_number'),
-        fastag_id=request.form.get('fastag_id'),
-        location_id=request.form.get('location_id'),
-        kyc_document_type=request.form.get('kyc_document_type'),
-        kyc_document_number=request.form.get('kyc_document_number'),
-        valid_from=datetime.strptime(request.form.get('valid_from'), '%Y-%m-%d').date(),
-        valid_to=datetime.strptime(request.form.get('valid_to'), '%Y-%m-%d').date(),
-        is_active=True
-    )
-    
-    # Handle KYC document upload
-    if 'kyc_document' in request.files:
-        file = request.files['kyc_document']
-        if file.filename:
-            filename = f"kyc_{user.vehicle_number}_{file.filename}"
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            user.kyc_document_path = filename
-    
-    db.session.add(user)
-    db.session.commit()
-    
-    # Add access permissions
-    lane_ids = request.form.getlist('access_lanes')
-    days_of_week = request.form.getlist('days_of_week')
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
-    
-    for lane_id in lane_ids:
-        permission = UserAccessPermission(
-            user_id=user.id,
-            lane_id=lane_id,
-            start_time=datetime.strptime(start_time, '%H:%M').time() if start_time else None,
-            end_time=datetime.strptime(end_time, '%H:%M').time() if end_time else None,
-            days_of_week=','.join(days_of_week)
-        )
-        db.session.add(permission)
-    
-    db.session.commit()
-    flash('User added successfully')
-    return redirect(url_for('users'))
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists', 'error')
+            return redirect(url_for('users'))
+        
+        user = User(username=username, password=generate_password_hash(password), role=role)
+        db.session.add(user)
+        db.session.commit()
+        
+        log_audit('User created', f'New user {username} created with role {role}')
+        flash('User created successfully', 'success')
+        return redirect(url_for('users'))
 
 @app.route('/users/<int:user_id>/edit', methods=['POST'])
 @login_required
@@ -478,18 +454,15 @@ def edit_user(user_id):
 @app.route('/users/<int:user_id>/delete', methods=['POST'])
 @login_required
 def delete_user(user_id):
-    user = db.session.get(VehicleUser, user_id)
-    if not user:
-        abort(404)
+    user = User.query.get_or_404(user_id)
+    if user.username == 'admin':
+        flash('Cannot delete admin user', 'error')
+        return redirect(url_for('users'))
     
-    # Delete associated access permissions
-    UserAccessPermission.query.filter_by(user_id=user.id).delete()
-    
-    # Delete user
+    log_audit('User deleted', f'User {user.username} deleted')
     db.session.delete(user)
     db.session.commit()
-    
-    flash('User deleted successfully')
+    flash('User deleted successfully', 'success')
     return redirect(url_for('users'))
 
 @app.route('/api/users/<int:user_id>')
@@ -1159,6 +1132,26 @@ def barrier_logs():
                          logs=pagination.items,
                          pagination=pagination,
                          lanes=lanes)
+
+@app.route('/audit_logs')
+@login_required
+def audit_logs():
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    logs = AuditLog.query.order_by(AuditLog.created_at.desc()).paginate(page=page, per_page=per_page)
+    return render_template('audit_logs.html', logs=logs)
+
+def log_audit(action, details=None):
+    """Utility function to log audit events"""
+    if current_user.is_authenticated:
+        audit_log = AuditLog(
+            user_id=current_user.id,
+            action=action,
+            details=details,
+            ip_address=request.remote_addr
+        )
+        db.session.add(audit_log)
+        db.session.commit()
 
 # Error handlers
 @app.errorhandler(400)
