@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, Response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Lane, Device, Location, VehicleUser, UserAccessPermission, AccessLog, PresenceLog
+from models import db, User, Lane, Device, Location, VehicleUser, UserAccessPermission, AccessLog, PresenceLog, BarrierLog
 import os
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -1125,6 +1125,41 @@ def debug_db():
 def api_test():
     return render_template('api_test.html')
 
+@app.route('/barrier-logs')
+@login_required
+def barrier_logs():
+    page = request.args.get('page', 1, type=int)
+    lane_id = request.args.get('lane_id', type=int)
+    action = request.args.get('action')
+    status = request.args.get('status')
+    date = request.args.get('date')
+    
+    # Build query
+    query = BarrierLog.query
+    
+    if lane_id:
+        query = query.filter(BarrierLog.lane_id == lane_id)
+    if action:
+        query = query.filter(BarrierLog.action == action)
+    if status:
+        query = query.filter(BarrierLog.status == status)
+    if date:
+        query = query.filter(db.func.date(BarrierLog.timestamp) == date)
+    
+    # Order by timestamp descending
+    query = query.order_by(BarrierLog.timestamp.desc())
+    
+    # Paginate results
+    pagination = query.paginate(page=page, per_page=20)
+    
+    # Get all lanes for the filter dropdown
+    lanes = Lane.query.all()
+    
+    return render_template('barrier_logs.html', 
+                         logs=pagination.items,
+                         pagination=pagination,
+                         lanes=lanes)
+
 # Error handlers
 @app.errorhandler(400)
 def bad_request_error(error):
@@ -1149,4 +1184,4 @@ def internal_error(error):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(host='10.20.1.41', port=5000, debug=True) 
+    app.run(host='127.0.0.1', port=5000, debug=True) 

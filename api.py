@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_restx import Api, Resource, fields
-from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog
+from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog, BarrierLog
 from datetime import datetime
 import json
 from functools import wraps
@@ -254,25 +254,50 @@ class BarrierControl(Resource):
                        'timestamp': '2024-04-08T10:00:02'
                    })
     def post(self):
-        """Control barrier operation"""
+        """Control barrier (open/close)"""
+        data = request.json
+        
+        # Validate lane exists
+        lane = Lane.query.get(data['lane_id'])
+        if not lane:
+            return {'error': 'Lane not found'}, 404
+            
+        # Validate device exists and is a controller
+        device = Device.query.filter_by(
+            id=data['device_id'],
+            device_type='controller'
+        ).first()
+        if not device:
+            return {'error': 'Controller device not found'}, 404
+            
         try:
-            data = request.json
-            lane = Lane.query.get(data['lane_id'])
-            device = Device.query.get(data['device_id'])
+            # Log the barrier action
+            barrier_log = BarrierLog(
+                lane_id=data['lane_id'],
+                device_id=data['device_id'],
+                action=data['action'],
+                status='success'
+            )
+            db.session.add(barrier_log)
+            db.session.commit()
             
-            if not lane or not device:
-                return {'message': 'Lane or device not found'}, 404
-                
-            if device.device_type != 'controller':
-                return {'message': 'Invalid device type'}, 400
-                
-            # Here you would implement the actual barrier control logic
-            # For now, we'll just log the command
-            print(f"Barrier {data['action']} command sent to lane {lane.id}")
-            
-            return {'message': f"Barrier {data['action']} command sent successfully"}, 200
+            return {
+                'message': f'Barrier {data["action"]}ed successfully',
+                'timestamp': data['timestamp']
+            }
         except Exception as e:
-            return {'message': str(e)}, 400
+            # Log the failed action
+            barrier_log = BarrierLog(
+                lane_id=data['lane_id'],
+                device_id=data['device_id'],
+                action=data['action'],
+                status='failed',
+                error_message=str(e)
+            )
+            db.session.add(barrier_log)
+            db.session.commit()
+            
+            return {'error': str(e)}, 500
 
 # Health check endpoints
 @health_ns.route('/check')

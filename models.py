@@ -166,4 +166,21 @@ class PresenceLog(db.Model):
     device = db.relationship('Device', backref=db.backref('presence_logs', lazy=True))
 
     def __repr__(self):
-        return f'<PresenceLog {self.id}>' 
+        return f'<PresenceLog {self.id}>'
+
+class BarrierLog(db.Model):
+    __tablename__ = 'barrier_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    lane_id = db.Column(db.Integer, db.ForeignKey('lanes.id'), nullable=False)
+    device_id = db.Column(db.Integer, db.ForeignKey('devices.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    action = db.Column(db.String(20), nullable=False)  # 'open' or 'close'
+    status = db.Column(db.String(20), nullable=False)  # 'success' or 'failed'
+    error_message = db.Column(db.String(200))
+    
+    # Relationships
+    lane = db.relationship('Lane', backref=db.backref('barrier_logs', lazy=True))
+    device = db.relationship('Device', backref=db.backref('barrier_logs', lazy=True))
+
+    def __repr__(self):
+        return f'<BarrierLog {self.id}>' 

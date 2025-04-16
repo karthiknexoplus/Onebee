@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Barrier Logs - Access Control{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Barrier Logs</h2>
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="lane_id" class="form-label">Lane</label>
+                    <select class="form-select" id="lane_id" name="lane_id">
+                        <option value="">All Lanes</option>
+                        {% for lane in lanes %}
+                        <option value="{{ lane.id }}" {% if request.args.get('lane_id')|int == lane.id %}selected{% endif %}>
+                            {{ lane.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="action" class="form-label">Action</label>
+                    <select class="form-select" id="action" name="action">
+                        <option value="">All Actions</option>
+                        <option value="open" {% if request.args.get('action') == 'open' %}selected{% endif %}>Open</option>
+                        <option value="close" {% if request.args.get('action') == 'close' %}selected{% endif %}>Close</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Statuses</option>
+                        <option value="success" {% if request.args.get('status') == 'success' %}selected{% endif %}>Success</option>
+                        <option value="failed" {% if request.args.get('status') == 'failed' %}selected{% endif %}>Failed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="date" name="date" value="{{ request.args.get('date', '') }}">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ url_for('barrier_logs') }}" class="btn btn-secondary">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Lane</th>
+                            <th>Device</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                            <th>Error Message</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ log.lane.name }}</td>
+                            <td>{{ log.device.name }}</td>
+                            <td>
+                                <span class="badge {% if log.action == 'open' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ log.action|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {% if log.status == 'success' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ log.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ log.error_message or '-' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No logs found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if pagination %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if pagination.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('barrier_logs', page=pagination.prev_num, **request.args) }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            <li class="page-item {% if page == pagination.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('barrier_logs', page=page, **request.args) }}">{{ page }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('barrier_logs', page=pagination.next_num, **request.args) }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
