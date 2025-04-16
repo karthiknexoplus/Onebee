@@ -136,6 +136,26 @@ success_model = api.model('Success', {
     'data': fields.Raw(description='Response data')
 })
 
+# Define user model for Swagger documentation
+user_model = api.model('User', {
+    'name': fields.String(required=True, description='Full name of the user'),
+    'designation': fields.String(required=True, description='User designation'),
+    'vehicle_number': fields.String(required=True, description='Vehicle registration number'),
+    'fastag_id': fields.String(required=True, description='Fastag ID'),
+    'location_id': fields.Integer(required=True, description='Location ID'),
+    'kyc_document_type': fields.String(required=True, description='Type of KYC document'),
+    'kyc_document_number': fields.String(required=True, description='KYC document number'),
+    'valid_from': fields.Date(required=True, description='Validity start date'),
+    'valid_to': fields.Date(required=True, description='Validity end date'),
+    'is_active': fields.Boolean(required=True, description='User status'),
+    'access_permissions': fields.List(fields.Nested(api.model('AccessPermission', {
+        'lane_id': fields.Integer(required=True, description='Lane ID'),
+        'start_time': fields.String(required=True, description='Access start time'),
+        'end_time': fields.String(required=True, description='Access end time'),
+        'days_of_week': fields.String(required=True, description='Days of week (1-7, comma-separated)')
+    })))
+})
+
 def no_auth_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -482,4 +502,61 @@ class LaneDeviceCounts(Resource):
             return {
                 'status': 'error',
                 'message': f'Error retrieving lane and device counts: {str(e)}'
+            }, 500
+
+@api.route('/users')
+class UserManagement(Resource):
+    @no_auth_required
+    @api.expect(user_model)
+    @api.doc('create_user')
+    def post(self):
+        """Create a new user"""
+        try:
+            data = request.json
+            
+            # Create new user
+            user = VehicleUser(
+                name=data['name'],
+                designation=data['designation'],
+                vehicle_number=data['vehicle_number'],
+                fastag_id=data['fastag_id'],
+                location_id=data['location_id'],
+                kyc_document_type=data['kyc_document_type'],
+                kyc_document_number=data['kyc_document_number'],
+                valid_from=datetime.strptime(data['valid_from'], '%Y-%m-%d').date(),
+                valid_to=datetime.strptime(data['valid_to'], '%Y-%m-%d').date(),
+                is_active=data['is_active']
+            )
+            
+            db.session.add(user)
+            db.session.flush()  # Get the user ID
+            
+            # Add access permissions
+            for permission in data['access_permissions']:
+                access_permission = UserAccessPermission(
+                    user_id=user.id,
+                    lane_id=permission['lane_id'],
+                    start_time=datetime.strptime(permission['start_time'], '%H:%M').time(),
+                    end_time=datetime.strptime(permission['end_time'], '%H:%M').time(),
+                    days_of_week=permission['days_of_week']
+                )
+                db.session.add(access_permission)
+            
+            db.session.commit()
+            
+            return {
+                'status': 'success',
+                'message': 'User created successfully',
+                'data': {
+                    'user_id': user.id,
+                    'name': user.name,
+                    'vehicle_number': user.vehicle_number
+                }
+            }
+            
+        except Exception as e:
+            db.session.rollback()
+            return {
+                'status': 'error',
+                'message': f'Error creating user: {str(e)}'
             }, 500 
