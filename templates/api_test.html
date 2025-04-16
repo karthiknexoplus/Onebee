@@ -35,6 +35,9 @@
                     <i class="fas fa-play me-2"></i>Test Vehicle Presence
                 </button>
             </form>
+            <div class="progress mb-3 d-none">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+            </div>
             <div class="response-container">
                 <div class="response-output"></div>
             </div>
@@ -78,6 +81,9 @@
                     <i class="fas fa-camera me-2"></i>Test ANPR
                 </button>
             </form>
+            <div class="progress mb-3 d-none">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+            </div>
             <div class="response-container">
                 <div class="response-output"></div>
             </div>
@@ -118,6 +124,9 @@
                     <i class="fas fa-door-open me-2"></i>Test Barrier Control
                 </button>
             </form>
+            <div class="progress mb-3 d-none">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+            </div>
             <div class="response-container">
                 <div class="response-output"></div>
             </div>
@@ -168,6 +177,9 @@
                     <i class="fas fa-heartbeat me-2"></i>Test Health Check
                 </button>
             </form>
+            <div class="progress mb-3 d-none">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+            </div>
             <div class="response-container">
                 <div class="response-output"></div>
             </div>
@@ -288,6 +300,31 @@
 .response-container::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+/* Response animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.response-item {
+    animation: fadeIn 0.3s ease-out;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Progress bar animation */
+.progress {
+    height: 4px;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
 </style>
 
 <script>
@@ -295,22 +332,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper function to handle API responses
     function handleResponse(formId, response, status = 'success') {
         const output = document.querySelector(`#${formId} .response-output`);
+        const progress = document.querySelector(`#${formId} .progress`);
         const timestamp = new Date().toLocaleString();
         
         let responseHtml = `
-            <div class="response-header">
-                <span class="response-timestamp">${timestamp}</span>
-                <span class="response-status status-${status}">
-                    ${status === 'pending' ? '<span class="loading-spinner"></span>' : ''}
-                    ${status.toUpperCase()}
-                </span>
+            <div class="response-item">
+                <div class="response-header">
+                    <span class="response-timestamp">${timestamp}</span>
+                    <span class="response-status status-${status}">
+                        ${status === 'pending' ? '<span class="loading-spinner"></span>' : ''}
+                        ${status.toUpperCase()}
+                    </span>
+                </div>
+                <pre>${JSON.stringify(response, null, 2)}</pre>
             </div>
-            <pre>${JSON.stringify(response, null, 2)}</pre>
         `;
         
         if (status === 'pending') {
+            progress.classList.remove('d-none');
             output.innerHTML = responseHtml;
         } else {
+            progress.classList.add('d-none');
             output.innerHTML = responseHtml + output.innerHTML;
         }
     }
