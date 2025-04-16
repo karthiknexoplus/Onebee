@@ -2,133 +2,173 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>API Testing Interface</h2>
+    <h2 class="mb-4">API Testing Interface</h2>
     
     <!-- Vehicle Presence API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Vehicle Presence API</h5>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Vehicle Presence API</h5>
         </div>
         <div class="card-body">
             <form id="presenceForm" class="mb-3">
-                <div class="mb-3">
-                    <label class="form-label">Lane ID</label>
-                    <input type="number" class="form-control" name="lane_id" required>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Lane ID</label>
+                            <input type="number" class="form-control" name="lane_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Device ID</label>
+                            <input type="number" class="form-control" name="device_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Confidence</label>
+                            <input type="number" class="form-control" name="confidence" step="0.01" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Device ID</label>
-                    <input type="number" class="form-control" name="device_id" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Confidence</label>
-                    <input type="number" class="form-control" name="confidence" step="0.01" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Test Vehicle Presence</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-play me-2"></i>Test Vehicle Presence
+                </button>
             </form>
             <div class="response-container">
-                <h6>Response:</h6>
                 <div class="response-output"></div>
             </div>
         </div>
     </div>
 
     <!-- ANPR API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>ANPR API</h5>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">ANPR API</h5>
         </div>
         <div class="card-body">
             <form id="anprForm" class="mb-3">
-                <div class="mb-3">
-                    <label class="form-label">Lane ID</label>
-                    <input type="number" class="form-control" name="lane_id" required>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Lane ID</label>
+                            <input type="number" class="form-control" name="lane_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Device ID</label>
+                            <input type="number" class="form-control" name="device_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Vehicle Number</label>
+                            <input type="text" class="form-control" name="vehicle_number" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Confidence</label>
+                            <input type="number" class="form-control" name="confidence" step="0.01" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Device ID</label>
-                    <input type="number" class="form-control" name="device_id" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Vehicle Number</label>
-                    <input type="text" class="form-control" name="vehicle_number" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Confidence</label>
-                    <input type="number" class="form-control" name="confidence" step="0.01" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Test ANPR</button>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-camera me-2"></i>Test ANPR
+                </button>
             </form>
             <div class="response-container">
-                <h6>Response:</h6>
                 <div class="response-output"></div>
             </div>
         </div>
     </div>
 
     <!-- Barrier Control API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Barrier Control API</h5>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Barrier Control API</h5>
         </div>
         <div class="card-body">
             <form id="barrierForm" class="mb-3">
-                <div class="mb-3">
-                    <label class="form-label">Lane ID</label>
-                    <input type="number" class="form-control" name="lane_id" required>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Lane ID</label>
+                            <input type="number" class="form-control" name="lane_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Device ID</label>
+                            <input type="number" class="form-control" name="device_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Action</label>
+                            <select class="form-control" name="action" required>
+                                <option value="open">Open</option>
+                                <option value="close">Close</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Device ID</label>
-                    <input type="number" class="form-control" name="device_id" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Action</label>
-                    <select class="form-control" name="action" required>
-                        <option value="open">Open</option>
-                        <option value="close">Close</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Test Barrier Control</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-door-open me-2"></i>Test Barrier Control
+                </button>
             </form>
             <div class="response-container">
-                <h6>Response:</h6>
                 <div class="response-output"></div>
             </div>
         </div>
     </div>
 
     <!-- Health Check API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Health Check API</h5>
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Health Check API</h5>
         </div>
         <div class="card-body">
             <form id="healthForm" class="mb-3">
-                <div class="mb-3">
-                    <label class="form-label">Lane ID</label>
-                    <input type="number" class="form-control" name="lane_id" required>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Lane ID</label>
+                            <input type="number" class="form-control" name="lane_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Device ID</label>
+                            <input type="number" class="form-control" name="device_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Device Type</label>
+                            <select class="form-control" name="device_type" required>
+                                <option value="sensor">Sensor</option>
+                                <option value="camera">Camera</option>
+                                <option value="barrier">Barrier</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-control" name="status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Device ID</label>
-                    <input type="number" class="form-control" name="device_id" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Device Type</label>
-                    <select class="form-control" name="device_type" required>
-                        <option value="sensor">Sensor</option>
-                        <option value="camera">Camera</option>
-                        <option value="barrier">Barrier</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-control" name="status" required>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Test Health Check</button>
+                <button type="submit" class="btn btn-info text-white">
+                    <i class="fas fa-heartbeat me-2"></i>Test Health Check
+                </button>
             </form>
             <div class="response-container">
-                <h6>Response:</h6>
                 <div class="response-output"></div>
             </div>
         </div>
@@ -142,13 +182,16 @@
     border-radius: 5px;
     margin-top: 10px;
     border: 1px solid #dee2e6;
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
 }
 
 .response-output {
     white-space: pre-wrap;
     word-wrap: break-word;
     margin: 0;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
     font-size: 14px;
     line-height: 1.5;
 }
@@ -203,6 +246,47 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+    border-color: #86b7fe;
+}
+
+/* Custom scrollbar for response container */
+.response-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.response-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.response-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.response-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 </style>
 
