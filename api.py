@@ -241,13 +241,24 @@ class ANPRResult(Resource):
             
             # Check access permission
             has_permission = False
-            if vehicle_user:
+            if vehicle_user and vehicle_user.is_active:
                 permission = UserAccessPermission.query.filter_by(
                     user_id=vehicle_user.id,
-                    lane_id=lane.id,
-                    is_active=True
+                    lane_id=lane.id
                 ).first()
-                has_permission = bool(permission)
+                
+                if permission:
+                    # Check if current time is within allowed time range
+                    current_time = datetime.fromisoformat(data['timestamp']).time()
+                    if permission.start_time and permission.end_time:
+                        if permission.start_time <= current_time <= permission.end_time:
+                            # Check if current day is in allowed days
+                            current_day = str(datetime.fromisoformat(data['timestamp']).weekday() + 1)
+                            allowed_days = permission.days_of_week.split(',')
+                            if current_day in allowed_days:
+                                has_permission = True
+                    else:
+                        has_permission = True
             
             # Log the access attempt
             log = AccessLog(
