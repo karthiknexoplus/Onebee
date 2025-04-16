@@ -273,6 +273,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Lane Device Counts API -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Lane Device Counts API</h5>
+        </div>
+        <div class="card-body">
+            <p>Get counts of lanes and their associated devices</p>
+            <button type="button" class="btn btn-primary" id="getLaneDeviceCounts">Get Lane Device Counts</button>
+            <div class="mt-3">
+                <h6>Response:</h6>
+                <div class="response-box" id="laneDeviceCountsResponse"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -496,6 +511,20 @@ document.addEventListener('DOMContentLoaded', function() {
             '/api/health/check',
             document.getElementById('healthCheckResponse')
         );
+    });
+
+    // Lane Device Counts API
+    document.getElementById('getLaneDeviceCounts').addEventListener('click', async function() {
+        const responseBox = document.getElementById('laneDeviceCountsResponse');
+        responseBox.textContent = 'Loading...';
+        
+        try {
+            const response = await fetch('/api/lane-device-counts');
+            const data = await response.json();
+            responseBox.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+            responseBox.textContent = `Error: ${error.message}`;
+        }
     });
 });
 </script>
