@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ - Access Control{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-question-circle"></i> Frequently Asked Questions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <!-- General Questions -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingGeneral">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGeneral" aria-expanded="true" aria-controls="collapseGeneral">
+                                    General Questions
+                                </button>
+                            </h2>
+                            <div id="collapseGeneral" class="accordion-collapse collapse show" aria-labelledby="headingGeneral" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>What is the Access Control System?</h5>
+                                        <p>The Access Control System is a comprehensive solution for managing vehicle access to facilities. It uses ANPR (Automatic Number Plate Recognition) cameras, Fastag readers, and barrier controllers to automate the entry and exit of vehicles.</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How does the system work?</h5>
+                                        <p>The system works through the following steps:</p>
+                                        <ol>
+                                            <li>Vehicle presence is detected by sensors</li>
+                                            <li>ANPR camera captures the vehicle number plate</li>
+                                            <li>System checks if the vehicle is authorized</li>
+                                            <li>If authorized, the barrier opens automatically</li>
+                                            <li>Access is logged in the system</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>What are the main features of the system?</h5>
+                                        <p>The system includes:</p>
+                                        <ul>
+                                            <li>Vehicle user management</li>
+                                            <li>Multiple lane support</li>
+                                            <li>Device management (ANPR, Fastag, controllers)</li>
+                                            <li>Access logs and reporting</li>
+                                            <li>API integration for external systems</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Management -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingUsers">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUsers" aria-expanded="false" aria-controls="collapseUsers">
+                                    User Management
+                                </button>
+                            </h2>
+                            <div id="collapseUsers" class="accordion-collapse collapse" aria-labelledby="headingUsers" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>How do I add a new vehicle user?</h5>
+                                        <p>To add a new vehicle user:</p>
+                                        <ol>
+                                            <li>Go to the Users page</li>
+                                            <li>Click on "Add New User"</li>
+                                            <li>Fill in the user details including vehicle number</li>
+                                            <li>Upload KYC documents if required</li>
+                                            <li>Set validity period</li>
+                                            <li>Click "Add User" to save</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I manage access permissions?</h5>
+                                        <p>Access permissions can be managed in two ways:</p>
+                                        <ol>
+                                            <li>During user creation, select the lanes the user can access</li>
+                                            <li>Edit an existing user to modify their access permissions</li>
+                                        </ol>
+                                        <p>You can also set specific time restrictions and days of the week for access.</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I handle expired user accounts?</h5>
+                                        <p>The system automatically marks users as inactive when their validity period expires. You can:</p>
+                                        <ul>
+                                            <li>View expired users in the Users list</li>
+                                            <li>Renew their access by editing their validity period</li>
+                                            <li>Archive users who no longer need access</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Device Management -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingDevices">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDevices" aria-expanded="false" aria-controls="collapseDevices">
+                                    Device Management
+                                </button>
+                            </h2>
+                            <div id="collapseDevices" class="accordion-collapse collapse" aria-labelledby="headingDevices" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>How do I add new devices?</h5>
+                                        <p>To add new devices:</p>
+                                        <ol>
+                                            <li>Go to the Settings page</li>
+                                            <li>Navigate to the "Devices" tab</li>
+                                            <li>Click "Add New Device"</li>
+                                            <li>Select the device type (ANPR, Fastag, Controller)</li>
+                                            <li>Enter the device details including IP address and port</li>
+                                            <li>Assign the device to a lane</li>
+                                            <li>Click "Add Device" to save</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I monitor device health?</h5>
+                                        <p>The system provides several ways to monitor device health:</p>
+                                        <ul>
+                                            <li>View device status in the dashboard</li>
+                                            <li>Check the health status API endpoint</li>
+                                            <li>Set up alerts for device failures</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>What should I do if a device is offline?</h5>
+                                        <p>If a device goes offline:</p>
+                                        <ol>
+                                            <li>Check the device's physical connection</li>
+                                            <li>Verify the IP address and port settings</li>
+                                            <li>Check if the device is powered on</li>
+                                            <li>If the issue persists, contact technical support</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reports and Logs -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingReports">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+                                    Reports and Logs
+                                </button>
+                            </h2>
+                            <div id="collapseReports" class="accordion-collapse collapse" aria-labelledby="headingReports" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>What types of reports are available?</h5>
+                                        <p>The system provides several types of reports:</p>
+                                        <ul>
+                                            <li>Daily Access Report</li>
+                                            <li>Weekly Access Report</li>
+                                            <li>Monthly Access Report</li>
+                                            <li>Vehicle-specific Report</li>
+                                            <li>Location-specific Report</li>
+                                        </ul>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I export reports?</h5>
+                                        <p>To export reports:</p>
+                                        <ol>
+                                            <li>Navigate to the Reports page</li>
+                                            <li>Select the report type</li>
+                                            <li>Set the date range if applicable</li>
+                                            <li>Click "Export" to download the report</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How long are access logs retained?</h5>
+                                        <p>Access logs are retained in the system for 1 year. After that, they are automatically archived. You can export logs before they are archived if you need to keep them for a longer period.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Integration -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingAPI">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAPI" aria-expanded="false" aria-controls="collapseAPI">
+                                    API Integration
+                                </button>
+                            </h2>
+                            <div id="collapseAPI" class="accordion-collapse collapse" aria-labelledby="headingAPI" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>What API endpoints are available?</h5>
+                                        <p>The system provides several API endpoints:</p>
+                                        <ul>
+                                            <li>Vehicle presence detection</li>
+                                            <li>ANPR result processing</li>
+                                            <li>Barrier control</li>
+                                            <li>Device health monitoring</li>
+                                        </ul>
+                                        <p>You can view the complete API documentation by clicking on "API Docs" in the navigation menu.</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I integrate with external systems?</h5>
+                                        <p>To integrate with external systems:</p>
+                                        <ol>
+                                            <li>Review the API documentation</li>
+                                            <li>Use the appropriate endpoints for your integration</li>
+                                            <li>Test the integration in a development environment first</li>
+                                            <li>Implement error handling for API responses</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>Is authentication required for API access?</h5>
+                                        <p>Yes, API authentication is required for security. You need to include an API key in the request headers. Contact the system administrator to obtain an API key.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Troubleshooting -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTroubleshooting">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTroubleshooting" aria-expanded="false" aria-controls="collapseTroubleshooting">
+                                    Troubleshooting
+                                </button>
+                            </h2>
+                            <div id="collapseTroubleshooting" class="accordion-collapse collapse" aria-labelledby="headingTroubleshooting" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-4">
+                                        <h5>What should I do if the system is not recognizing vehicle numbers?</h5>
+                                        <p>If the system is not recognizing vehicle numbers:</p>
+                                        <ol>
+                                            <li>Check if the ANPR camera is functioning properly</li>
+                                            <li>Verify that the camera is properly positioned</li>
+                                            <li>Ensure there is adequate lighting</li>
+                                            <li>Check if the vehicle number is clearly visible</li>
+                                            <li>Verify that the vehicle number format is correct in the database</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>How do I reset the system if it's not responding?</h5>
+                                        <p>If the system is not responding:</p>
+                                        <ol>
+                                            <li>Try refreshing the browser page</li>
+                                            <li>Clear browser cache and cookies</li>
+                                            <li>If the issue persists, contact technical support</li>
+                                        </ol>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h5>What should I do if I forget my password?</h5>
+                                        <p>If you forget your password:</p>
+                                        <ol>
+                                            <li>Click on "Forgot Password" on the login page</li>
+                                            <li>Enter your email address</li>
+                                            <li>Follow the instructions sent to your email</li>
+                                            <li>If you don't receive the email, contact the system administrator</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

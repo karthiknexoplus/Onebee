@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Report Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form id="reportFilters" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="locationFilter" class="form-label">Location</label>
+                            <select class="form-select" id="locationFilter">
+                                <option value="">All Locations</option>
+                                {% for location in locations %}
+                                <option value="{{ location.id }}">{{ location.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="laneFilter" class="form-label">Lane</label>
+                            <select class="form-select" id="laneFilter">
+                                <option value="">All Lanes</option>
+                                {% for lane in lanes %}
+                                <option value="{{ lane.id }}">{{ lane.name }} ({{ lane.lane_type }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateRange" class="form-label">Date Range</label>
+                            <select class="form-select" id="dateRange">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last7days">Last 7 Days</option>
+                                <option value="last30days">Last 30 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-none" id="customDateRange">
+                            <label class="form-label">Custom Date Range</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="startDate">
+                                <input type="date" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{{ report_type|title }} Report</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary" onclick="exportReport('csv')">
+                            <i class="bi bi-file-earmark-excel"></i> Export CSV
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="exportReport('pdf')">
+                            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Lane</th>
+                                    <th>Vehicle Number</th>
+                                    <th>Fastag ID</th>
+                                    <th>Access Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in report_data %}
+                                <tr>
+                                    <td>{{ entry.date }}</td>
+                                    <td>{{ entry.location }}</td>
+                                    <td>{{ entry.lane }}</td>
+                                    <td>{{ entry.vehicle_number }}</td>
+                                    <td>{{ entry.fastag_id }}</td>
+                                    <td>{{ entry.access_time }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if entry.status == 'Allowed' else 'danger' }}">
+                                            {{ entry.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date range picker
+    const dateRange = document.getElementById('dateRange');
+    const customDateRange = document.getElementById('customDateRange');
+    
+    dateRange.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customDateRange.classList.remove('d-none');
+        } else {
+            customDateRange.classList.add('d-none');
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('reportFilters').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const locationId = document.getElementById('locationFilter').value;
+        const laneId = document.getElementById('laneFilter').value;
+        const dateRange = document.getElementById('dateRange').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        // Construct URL with filters
+        let url = `/reports/{{ report_type }}?`;
+        if (locationId) url += `location=${locationId}&`;
+        if (laneId) url += `lane=${laneId}&`;
+        if (dateRange === 'custom') {
+            url += `start_date=${startDate}&end_date=${endDate}`;
+        } else {
+            url += `range=${dateRange}`;
+        }
+
+        // Reload page with filters
+        window.location.href = url;
+    });
+});
+
+function resetFilters() {
+    document.getElementById('locationFilter').value = '';
+    document.getElementById('laneFilter').value = '';
+    document.getElementById('dateRange').value = 'today';
+    document.getElementById('customDateRange').classList.add('d-none');
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+}
+
+function exportReport(format) {
+    const locationId = document.getElementById('locationFilter').value;
+    const laneId = document.getElementById('laneFilter').value;
+    const dateRange = document.getElementById('dateRange').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    // Construct export URL with filters
+    let url = `/reports/export/{{ report_type }}?format=${format}`;
+    if (locationId) url += `&location=${locationId}`;
+    if (laneId) url += `&lane=${laneId}`;
+    if (dateRange === 'custom') {
+        url += `&start_date=${startDate}&end_date=${endDate}`;
+    } else {
+        url += `&range=${dateRange}`;
+    }
+
+    // Trigger download
+    window.location.href = url;
+}
+</script>
+{% endblock %} 

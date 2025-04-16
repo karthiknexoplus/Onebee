@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">User Manual</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Table of Contents</h2>
+        </div>
+        <div class="card-body">
+            <ol class="list-unstyled">
+                <li><a href="#getting-started">1. Getting Started</a></li>
+                <li><a href="#dashboard">2. Dashboard</a></li>
+                <li><a href="#user-management">3. User Management</a></li>
+                <li><a href="#location-management">4. Location Management</a></li>
+                <li><a href="#lane-management">5. Lane Management</a></li>
+                <li><a href="#device-management">6. Device Management</a></li>
+                <li><a href="#reports">7. Reports</a></li>
+                <li><a href="#troubleshooting">8. Troubleshooting</a></li>
+            </ol>
+        </div>
+    </div>
+
+    <section id="getting-started" class="mb-5">
+        <h2>1. Getting Started</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>System Requirements</h3>
+                <ul>
+                    <li>Modern web browser (Chrome, Firefox, Safari, or Edge)</li>
+                    <li>Internet connection</li>
+                    <li>Valid user credentials</li>
+                </ul>
+
+                <h3>Logging In</h3>
+                <ol>
+                    <li>Navigate to the login page</li>
+                    <li>Enter your username and password</li>
+                    <li>Click the "Login" button</li>
+                </ol>
+
+                <h3>Navigation</h3>
+                <p>The main navigation bar provides access to all major features:</p>
+                <ul>
+                    <li><strong>Dashboard:</strong> Overview of system activity</li>
+                    <li><strong>Users:</strong> Manage vehicle users and their access</li>
+                    <li><strong>Locations:</strong> Configure locations and lanes</li>
+                    <li><strong>Devices:</strong> Manage ANPR cameras and other devices</li>
+                    <li><strong>Reports:</strong> View and generate various reports</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="dashboard" class="mb-5">
+        <h2>2. Dashboard</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Overview</h3>
+                <p>The dashboard provides a real-time overview of system activity, including:</p>
+                <ul>
+                    <li>Today's access count</li>
+                    <li>Access distribution by time</li>
+                    <li>Vehicle type distribution</li>
+                    <li>Recent access logs</li>
+                </ul>
+
+                <h3>Quick Actions</h3>
+                <p>From the dashboard, you can quickly:</p>
+                <ul>
+                    <li>View daily reports</li>
+                    <li>Check vehicle access status</li>
+                    <li>Monitor device status</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="user-management" class="mb-5">
+        <h2>3. User Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Adding a New User</h3>
+                <ol>
+                    <li>Click "Add User" in the Users section</li>
+                    <li>Fill in the required information:
+                        <ul>
+                            <li>Name</li>
+                            <li>Vehicle Number</li>
+                            <li>Location</li>
+                            <li>Valid From and To dates</li>
+                            <li>KYC Document</li>
+                        </ul>
+                    </li>
+                    <li>Click "Save" to create the user</li>
+                </ol>
+
+                <h3>Managing User Access</h3>
+                <ul>
+                    <li>Edit user details by clicking the edit icon</li>
+                    <li>View user access history</li>
+                    <li>Enable/disable user access</li>
+                    <li>Update KYC documents</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="location-management" class="mb-5">
+        <h2>4. Location Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Adding a Location</h3>
+                <ol>
+                    <li>Click "Add Location" in the Locations section</li>
+                    <li>Enter location details:
+                        <ul>
+                            <li>Name</li>
+                            <li>Address</li>
+                            <li>Contact Information</li>
+                        </ul>
+                    </li>
+                    <li>Click "Save" to create the location</li>
+                </ol>
+
+                <h3>Managing Locations</h3>
+                <ul>
+                    <li>Edit location details</li>
+                    <li>Add/remove lanes</li>
+                    <li>Configure access settings</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="lane-management" class="mb-5">
+        <h2>5. Lane Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Adding a Lane</h3>
+                <ol>
+                    <li>Select a location</li>
+                    <li>Click "Add Lane"</li>
+                    <li>Configure lane settings:
+                        <ul>
+                            <li>Lane Name</li>
+                            <li>Lane Type (Entry/Exit)</li>
+                            <li>Associated Devices</li>
+                        </ul>
+                    </li>
+                    <li>Click "Save" to create the lane</li>
+                </ol>
+
+                <h3>Managing Lanes</h3>
+                <ul>
+                    <li>Edit lane configuration</li>
+                    <li>Assign/unassign devices</li>
+                    <li>Monitor lane status</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="device-management" class="mb-5">
+        <h2>6. Device Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Adding a Device</h3>
+                <ol>
+                    <li>Click "Add Device" in the Devices section</li>
+                    <li>Enter device details:
+                        <ul>
+                            <li>Device Name</li>
+                            <li>Device Type</li>
+                            <li>IP Address</li>
+                            <li>Port</li>
+                        </ul>
+                    </li>
+                    <li>Click "Save" to add the device</li>
+                </ol>
+
+                <h3>Managing Devices</h3>
+                <ul>
+                    <li>Edit device configuration</li>
+                    <li>Assign devices to lanes</li>
+                    <li>Monitor device status</li>
+                    <li>View device logs</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="reports" class="mb-5">
+        <h2>7. Reports</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Available Reports</h3>
+                <ul>
+                    <li><strong>Daily Report:</strong> Access activity for the current day</li>
+                    <li><strong>Weekly Report:</strong> Weekly access patterns and statistics</li>
+                    <li><strong>Monthly Report:</strong> Monthly overview of system activity</li>
+                    <li><strong>Vehicle Report:</strong> Detailed vehicle access history</li>
+                    <li><strong>Location Report:</strong> Access patterns by location</li>
+                </ul>
+
+                <h3>Generating Reports</h3>
+                <ol>
+                    <li>Select the desired report type</li>
+                    <li>Choose the date range (if applicable)</li>
+                    <li>Click "Generate Report"</li>
+                    <li>View or download the report</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section id="troubleshooting" class="mb-5">
+        <h2>8. Troubleshooting</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Common Issues</h3>
+                <ul>
+                    <li><strong>Login Issues:</strong>
+                        <ul>
+                            <li>Ensure correct username and password</li>
+                            <li>Check if your account is active</li>
+                            <li>Clear browser cache and cookies</li>
+                        </ul>
+                    </li>
+                    <li><strong>Device Connection Issues:</strong>
+                        <ul>
+                            <li>Verify network connectivity</li>
+                            <li>Check device IP and port settings</li>
+                            <li>Ensure device is powered on</li>
+                        </ul>
+                    </li>
+                    <li><strong>Report Generation Issues:</strong>
+                        <ul>
+                            <li>Verify date range selection</li>
+                            <li>Check if data exists for the selected period</li>
+                            <li>Ensure proper permissions</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Getting Help</h3>
+                <p>If you encounter any issues not covered in this manual:</p>
+                <ul>
+                    <li>Contact your system administrator</li>
+                    <li>Check the system logs for error messages</li>
+                    <li>Refer to the technical documentation</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %} 

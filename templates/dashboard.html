@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Access Control{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2 class="card-text">{{ users|length }}</h2>
+                    <p class="card-text"><small>Active: {{ active_users }}</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Lanes</h5>
+                    <h2 class="card-text">{{ lanes|length }}</h2>
+                    <p class="card-text"><small>Active: {{ active_lanes }}</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Locations</h5>
+                    <h2 class="card-text">{{ locations|length }}</h2>
+                    <p class="card-text"><small>Active: {{ active_locations }}</small></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Access</h5>
+                    <h2 class="card-text">{{ today_access }}</h2>
+                    <p class="card-text"><small>Denied: {{ today_denied }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Access by Vehicle Type</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="vehicleTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Access by Time of Day</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="timeOfDayChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Access by Location</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="locationChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Access by Day of Week</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dayOfWeekChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Reports -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Recent Access Logs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Vehicle</th>
+                                    <th>Location</th>
+                                    <th>Lane</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_logs %}
+                                <tr>
+                                    <td>{{ log.timestamp }}</td>
+                                    <td>{{ log.vehicle_number }}</td>
+                                    <td>{{ log.location }}</td>
+                                    <td>{{ log.lane }}</td>
+                                    <td>
+                                        {% if log.status == 'granted' %}
+                                        <span class="badge bg-success">Granted</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Denied</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Quick Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('report', report_type='daily') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-day"></i> Daily Access Report
+                        </a>
+                        <a href="{{ url_for('report', report_type='weekly') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-week"></i> Weekly Access Report
+                        </a>
+                        <a href="{{ url_for('report', report_type='monthly') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-month"></i> Monthly Access Report
+                        </a>
+                        <a href="{{ url_for('report', report_type='vehicle') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-car-front"></i> Vehicle Access Report
+                        </a>
+                        <a href="{{ url_for('report', report_type='location') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-geo-alt"></i> Location-wise Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Data Management -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Test Data Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Locations</h6>
+                                    <p class="card-text">Generate test locations with addresses</p>
+                                    <form action="{{ url_for('generate_test_data', type='locations') }}" method="POST">
+                                        <div class="mb-3">
+                                            <label for="locationCount" class="form-label">Number of Locations</label>
+                                            <input type="number" class="form-control" id="locationCount" name="count" value="2" min="1" max="10">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Generate Locations</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Lanes</h6>
+                                    <p class="card-text">Generate test lanes with devices</p>
+                                    <form action="{{ url_for('generate_test_data', type='lanes') }}" method="POST">
+                                        <div class="mb-3">
+                                            <label for="laneCount" class="form-label">Number of Lanes</label>
+                                            <input type="number" class="form-control" id="laneCount" name="count" value="3" min="1" max="10">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="laneLocation" class="form-label">Location</label>
+                                            <select class="form-select" id="laneLocation" name="location_id" required>
+                                                <option value="">Select Location</option>
+                                                {% for location in locations %}
+                                                <option value="{{ location.id }}">{{ location.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Generate Lanes</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Vehicle Users</h6>
+                                    <p class="card-text">Generate test vehicle users with random data</p>
+                                    <form action="{{ url_for('generate_test_data', type='vehicle_users') }}" method="POST">
+                                        <div class="mb-3">
+                                            <label for="userCount" class="form-label">Number of Users</label>
+                                            <input type="number" class="form-control" id="userCount" name="count" value="5" min="1" max="50">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Generate Users</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Access Logs</h6>
+                                    <p class="card-text">Generate test access logs</p>
+                                    <form action="{{ url_for('generate_test_data', type='access_logs') }}" method="POST">
+                                        <div class="mb-3">
+                                            <label for="logCount" class="form-label">Number of Logs</label>
+                                            <input type="number" class="form-control" id="logCount" name="count" value="20" min="1" max="100">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Generate Logs</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Database Management</h6>
+                                    <div class="d-flex gap-2">
+                                        <form action="{{ url_for('reset_database') }}" method="POST" onsubmit="return confirm('Are you sure you want to reset the entire database? This will delete ALL data and cannot be undone.');">
+                                            <button type="submit" class="btn btn-danger">Reset Database</button>
+                                        </form>
+                                        <form action="{{ url_for('clear_test_data') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all test data? This action cannot be undone.');">
+                                            <button type="submit" class="btn btn-warning">Clear All Test Data</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Vehicle Type Chart
+    const vehicleTypeCtx = document.getElementById('vehicleTypeChart').getContext('2d');
+    new Chart(vehicleTypeCtx, {
+        type: 'pie',
+        data: {
+            labels: ['2W', '4W'],
+            datasets: [{
+                data: [{{ two_wheeler_count }}, {{ four_wheeler_count }}],
+                backgroundColor: ['#FF6384', '#36A2EB']
+            }]
+        }
+    });
+
+    // Time of Day Chart
+    const timeOfDayCtx = document.getElementById('timeOfDayChart').getContext('2d');
+    new Chart(timeOfDayCtx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [{
+                label: 'Access Count',
+                data: {{ time_distribution }},
+                borderColor: '#4BC0C0',
+                tension: 0.1
+            }]
+        }
+    });
+
+    // Location Chart
+    const locationCtx = document.getElementById('locationChart').getContext('2d');
+    new Chart(locationCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ location_names|tojson }},
+            datasets: [{
+                label: 'Access Count',
+                data: {{ location_counts }},
+                backgroundColor: '#FF9F40'
+            }]
+        }
+    });
+
+    // Day of Week Chart
+    const dayOfWeekCtx = document.getElementById('dayOfWeekChart').getContext('2d');
+    new Chart(dayOfWeekCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Access Count',
+                data: {{ day_distribution }},
+                backgroundColor: '#9966FF'
+            }]
+        }
+    });
+</script>
+{% endblock %} 
