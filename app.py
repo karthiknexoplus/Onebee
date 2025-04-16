@@ -1198,5 +1198,5 @@ def get_presence_logs():
     } for log in logs])
 
 if __name__ == '__main__':
-    app.run(debug=True, host = "192.168.29.114", port = 5000)
+    app.run(debug=True, host = "10.20.1.41", port = 5000)
     # app.run(debug=True) 
