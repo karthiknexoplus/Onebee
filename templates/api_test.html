@@ -38,6 +38,13 @@
             </div>
             <form id="vehiclePresenceForm" class="api-form">
                 <div class="row g-3">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="externalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="externalUrl">External Server URL (Optional)</label>
+                        </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
                     <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="laneId" name="lane_id" placeholder="Lane ID" value="1" required>
@@ -106,6 +113,13 @@
             </div>
             <form id="anprForm" class="api-form">
                 <div class="row g-3">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="anprExternalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="anprExternalUrl">External Server URL (Optional)</label>
+                        </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
                     <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="anprLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
@@ -159,45 +173,116 @@
             <span class="badge bg-primary">POST /api/barrier/control</span>
         </div>
         <div class="card-body">
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                <p class="mb-2">Send barrier control commands to this endpoint:</p>
+                <div class="bg-light p-2 rounded mb-2">
+                    <code>POST http://192.168.1.3:5000/api/barrier/control</code>
+                </div>
+                <p class="mb-0">This endpoint accepts POST requests with barrier control commands in JSON format.</p>
+            </div>
+
             <div class="alert alert-secondary mb-3">
-                <h6 class="alert-heading">Example Data:</h6>
+                <h6 class="alert-heading">Request Format:</h6>
+                <p class="mb-2">Send a JSON payload with the following structure:</p>
                 <pre class="mb-0">{
+    "lane_id": 1,                    // Integer: ID of the lane
+    "device_id": 103,                // Integer: ID of the barrier controller
+    "action": "open",                // String: "open" or "close"
+    "timestamp": "2024-04-16T15:30:00Z"  // ISO 8601 timestamp
+}</pre>
+            </div>
+
+            <div class="alert alert-warning mb-3">
+                <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Important Notes:</h6>
+                <ul class="mb-0">
+                    <li>Send data using POST method to the URL above</li>
+                    <li>Set Content-Type header to 'application/json'</li>
+                    <li>All fields are required</li>
+                    <li>Timestamp should be in ISO 8601 format</li>
+                    <li>Action must be either "open" or "close"</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-success mb-3">
+                <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Example cURL Commands:</h6>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>Basic Request:</strong></p>
+                    <pre class="mb-2">curl -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -d '{
     "lane_id": 1,
     "device_id": 103,
     "action": "open",
     "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>With Additional Headers:</strong></p>
+                    <pre class="mb-2">curl -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer your-token-here" \
+  -d '{
+    "lane_id": 1,
+    "device_id": 103,
+    "action": "open",
+    "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>With Verbose Output:</strong></p>
+                    <pre class="mb-0">curl -v -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "lane_id": 1,
+    "device_id": 103,
+    "action": "open",
+    "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Options explained:
+                        <ul class="mb-0">
+                            <li><code>-X POST</code>: Specifies the HTTP method</li>
+                            <li><code>-H</code>: Adds HTTP headers</li>
+                            <li><code>-d</code>: Specifies the request body data</li>
+                            <li><code>-v</code>: Enables verbose output (shows headers, etc.)</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Expected Response:</h6>
+                <pre class="mb-0">{
+    "status": "success",
+    "message": "Barrier command received",
+    "data": {
+        "lane_id": 1,
+        "device_id": 103,
+        "action": "open",
+        "timestamp": "2024-04-16T15:30:00Z",
+        "execution_status": "pending"
+    }
 }</pre>
             </div>
-            <form id="barrierControlForm" class="api-form">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" id="barrierLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
-                            <label for="barrierLaneId">Lane ID</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" id="barrierDeviceId" name="device_id" placeholder="Device ID" value="103" required>
-                            <label for="barrierDeviceId">Device ID</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <select class="form-select" id="action" name="action" required>
-                                <option value="open" selected>Open</option>
-                                <option value="close">Close</option>
-                            </select>
-                            <label for="action">Action</label>
-                        </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-primary" id="startBarrierListener">
+                            <i class="fas fa-play me-2"></i>Start Listening
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="stopBarrierListener" disabled>
+                            <i class="fas fa-stop me-2"></i>Stop Listening
+                        </button>
                     </div>
                 </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-2"></i>Test Barrier Control API
-                    </button>
-                </div>
-            </form>
+            </div>
             <div class="response-container mt-3">
                 <div class="response-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0">Response</h6>
@@ -206,7 +291,12 @@
                         <span class="status-text">Ready</span>
                     </div>
                 </div>
-                <div class="response-box" id="barrierControlResponse"></div>
+                <div class="response-box" id="barrierControlResponse">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Click "Start Listening" to begin receiving barrier control commands
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -223,35 +313,58 @@
             <div class="alert alert-secondary mb-3">
                 <h6 class="alert-heading">Example Data:</h6>
                 <pre class="mb-0">{
-    "lane_id": 1,
-    "device_id": 104,
-    "device_type": "sensor",
-    "status": "healthy",
-    "last_heartbeat": "2024-04-16T15:30:00Z",
-    "timestamp": "2024-04-16T15:30:00Z"
+    "lane_id": 1,                    // Integer: ID of the lane
+    "device_id": 104,                // Integer: ID of the device
+    "device_type": "sensor",         // String: Type of device (sensor/anpr/controller)
+    "status": "healthy",             // String: Device status (healthy/unhealthy)
+    "last_heartbeat": "2024-04-16T15:30:00Z",  // ISO 8601 timestamp
+    "error_message": null            // String or null: Error details if any
 }</pre>
             </div>
             <form id="healthCheckForm" class="api-form">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="healthExternalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="healthExternalUrl">External Server URL (Optional)</label>
+                        </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="healthLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
                             <label for="healthLaneId">Lane ID</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="healthDeviceId" name="device_id" placeholder="Device ID" value="104" required>
                             <label for="healthDeviceId">Device ID</label>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="deviceType" name="device_type" required>
+                                <option value="sensor" selected>Sensor</option>
+                                <option value="anpr">ANPR</option>
+                                <option value="controller">Controller</option>
+                            </select>
+                            <label for="deviceType">Device Type</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="form-floating">
                             <select class="form-select" id="healthStatus" name="status" required>
                                 <option value="healthy" selected>Healthy</option>
                                 <option value="unhealthy">Unhealthy</option>
                             </select>
                             <label for="healthStatus">Status</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="errorMessage" name="error_message" placeholder="Error Message">
+                            <label for="errorMessage">Error Message (Optional)</label>
                         </div>
                     </div>
                 </div>
@@ -275,16 +388,113 @@
     </div>
 
     <!-- Lane Device Counts API -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Lane Device Counts API</h5>
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Lane Device Counts API
+            </h5>
+            <span class="badge bg-primary">GET /api/lane-device-counts</span>
         </div>
         <div class="card-body">
-            <p>Get counts of lanes and their associated devices</p>
-            <button type="button" class="btn btn-primary" id="getLaneDeviceCounts">Get Lane Device Counts</button>
-            <div class="mt-3">
-                <h6>Response:</h6>
-                <div class="response-box" id="laneDeviceCountsResponse"></div>
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                <p class="mb-2">This endpoint retrieves the current counts of lanes and their associated devices from the database.</p>
+                <div class="bg-light p-2 rounded mb-2">
+                    <code>GET http://192.168.1.3:5000/api/lane-device-counts</code>
+                </div>
+                <p class="mb-0">No request body or parameters required. Simply make a GET request to the endpoint.</p>
+            </div>
+
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Expected Response Format:</h6>
+                <p class="mb-2">The API will return a JSON response with the following structure:</p>
+                <pre class="mb-0">{
+    "total_lanes": 5,                // Integer: Total number of lanes
+    "total_devices": 15,             // Integer: Total number of devices
+    "lane_details": [                // Array of lane information
+        {
+            "lane_id": 1,            // Integer: Unique identifier for the lane
+            "device_count": 3,        // Integer: Number of devices in this lane
+            "devices": [              // Array of devices in this lane
+                {
+                    "device_id": 101,         // Integer: Unique identifier for the device
+                    "device_type": "sensor",  // String: Type of device (sensor/anpr/controller)
+                    "status": "healthy"       // String: Device status (healthy/unhealthy)
+                },
+                {
+                    "device_id": 102,
+                    "device_type": "anpr",
+                    "status": "healthy"
+                },
+                {
+                    "device_id": 103,
+                    "device_type": "controller",
+                    "status": "healthy"
+                }
+            ]
+        }
+        // ... more lanes
+    ]
+}</pre>
+            </div>
+
+            <div class="alert alert-success mb-3">
+                <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Example cURL Commands:</h6>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>Basic Request:</strong></p>
+                    <pre class="mb-2">curl -X GET http://192.168.1.3:5000/api/lane-device-counts</pre>
+                </div>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>With Headers:</strong></p>
+                    <pre class="mb-2">curl -X GET http://192.168.1.3:5000/api/lane-device-counts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"</pre>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>With Verbose Output:</strong></p>
+                    <pre class="mb-0">curl -v -X GET http://192.168.1.3:5000/api/lane-device-counts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"</pre>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Options explained:
+                        <ul class="mb-0">
+                            <li><code>-X GET</code>: Specifies the HTTP method</li>
+                            <li><code>-H</code>: Adds HTTP headers</li>
+                            <li><code>-v</code>: Enables verbose output (shows headers, etc.)</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-primary" id="getLaneDeviceCounts">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh Counts
+                        </button>
+                        <div class="text-muted">
+                            <small>Last updated: <span id="lastUpdated">Never</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="laneDeviceCountsResponse">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Click "Refresh Counts" to fetch current lane and device data
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -633,56 +843,318 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Vehicle Presence API
-    document.getElementById('vehiclePresenceForm').addEventListener('submit', function(e) {
+    document.getElementById('vehiclePresenceForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        handleApiRequest(
-            this,
-            '/api/vehicle/presence',
-            document.getElementById('vehiclePresenceResponse')
-        );
+        const form = e.target;
+        const responseBox = document.getElementById('vehiclePresenceResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            confidence: parseFloat(formData.get('confidence')),
+            status: formData.get('status'),
+            timestamp: new Date().toISOString()
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/vehicle/presence', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+        }
     });
 
     // ANPR API
-    document.getElementById('anprForm').addEventListener('submit', function(e) {
+    document.getElementById('anprForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        handleApiRequest(
-            this,
-            '/api/vehicle/anpr',
-            document.getElementById('anprResponse')
-        );
+        const form = e.target;
+        const responseBox = document.getElementById('anprResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            vehicle_number: formData.get('vehicle_number'),
+            confidence: parseFloat(formData.get('confidence')),
+            timestamp: new Date().toISOString()
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/vehicle/anpr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+        }
     });
 
     // Barrier Control API
-    document.getElementById('barrierControlForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        handleApiRequest(
-            this,
-            '/api/barrier/control',
-            document.getElementById('barrierControlResponse')
-        );
+    let barrierListenerInterval = null;
+    const startBarrierListener = document.getElementById('startBarrierListener');
+    const stopBarrierListener = document.getElementById('stopBarrierListener');
+    const barrierResponseBox = document.getElementById('barrierControlResponse');
+    const barrierStatusIndicator = document.querySelector('#barrierControlResponse').closest('.response-container').querySelector('.status-indicator');
+    const barrierStatusText = document.querySelector('#barrierControlResponse').closest('.response-container').querySelector('.status-text');
+
+    startBarrierListener.addEventListener('click', function() {
+        // Disable start button and enable stop button
+        startBarrierListener.disabled = true;
+        stopBarrierListener.disabled = false;
+
+        // Update status
+        barrierStatusIndicator.className = 'status-indicator pending';
+        barrierStatusText.textContent = 'Listening...';
+        barrierResponseBox.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Waiting for barrier control commands...</div>';
+
+        // Start polling for barrier control commands
+        barrierListenerInterval = setInterval(async () => {
+            try {
+                const response = await fetch('/api/barrier/control');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && Object.keys(data).length > 0) {
+                        // Update status
+                        barrierStatusIndicator.className = 'status-indicator success';
+                        barrierStatusText.textContent = 'Command Received';
+                        
+                        // Display the received command
+                        barrierResponseBox.innerHTML = `
+                            <div class="alert alert-success">
+                                <h6 class="alert-heading">Barrier Control Command Received:</h6>
+                                <pre class="mb-0">${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        `;
+
+                        // Optional: Auto-stop after receiving a command
+                        // stopBarrierListener.click();
+                    }
+                }
+            } catch (error) {
+                barrierStatusIndicator.className = 'status-indicator error';
+                barrierStatusText.textContent = 'Error';
+                barrierResponseBox.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            }
+        }, 2000); // Poll every 2 seconds
+    });
+
+    stopBarrierListener.addEventListener('click', function() {
+        // Clear the interval
+        if (barrierListenerInterval) {
+            clearInterval(barrierListenerInterval);
+            barrierListenerInterval = null;
+        }
+
+        // Enable start button and disable stop button
+        startBarrierListener.disabled = false;
+        stopBarrierListener.disabled = true;
+
+        // Update status
+        barrierStatusIndicator.className = 'status-indicator';
+        barrierStatusText.textContent = 'Stopped';
+        barrierResponseBox.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-info-circle me-2"></i>
+                Listening stopped. Click "Start Listening" to begin receiving barrier control commands
+            </div>
+        `;
     });
 
     // Health Check API
-    document.getElementById('healthCheckForm').addEventListener('submit', function(e) {
+    document.getElementById('healthCheckForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        handleApiRequest(
-            this,
-            '/api/health/check',
-            document.getElementById('healthCheckResponse')
-        );
+        const form = e.target;
+        const responseBox = document.getElementById('healthCheckResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            device_type: formData.get('device_type'),
+            status: formData.get('status'),
+            last_heartbeat: new Date().toISOString(),
+            error_message: formData.get('error_message') || null
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/health/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+        }
     });
 
     // Lane Device Counts API
     document.getElementById('getLaneDeviceCounts').addEventListener('click', async function() {
         const responseBox = document.getElementById('laneDeviceCountsResponse');
-        responseBox.textContent = 'Loading...';
-        
+        const statusIndicator = responseBox.closest('.response-container').querySelector('.status-indicator');
+        const statusText = responseBox.closest('.response-container').querySelector('.status-text');
+        const lastUpdated = document.getElementById('lastUpdated');
+
         try {
+            statusIndicator.className = 'status-indicator pending';
+            statusText.textContent = 'Fetching...';
+            responseBox.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Loading data...</div>';
+
             const response = await fetch('/api/lane-device-counts');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
-            responseBox.textContent = JSON.stringify(data, null, 2);
+
+            // Update the display
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            lastUpdated.textContent = new Date().toLocaleTimeString();
+            
+            // Format the response with a nice layout
+            let htmlContent = `
+                <div class="alert alert-success mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Total Lanes:</strong> ${data.total_lanes || 0}
+                        </div>
+                        <div>
+                            <strong>Total Devices:</strong> ${data.total_devices || 0}
+                        </div>
+                    </div>
+                </div>`;
+
+            // Check if lane_details exists and is an array
+            if (Array.isArray(data.lane_details) && data.lane_details.length > 0) {
+                htmlContent += '<div class="lane-details">';
+                data.lane_details.forEach(lane => {
+                    htmlContent += `
+                        <div class="card mb-2">
+                            <div class="card-header py-2">
+                                <strong>Lane ${lane.lane_id}</strong> - ${lane.device_count || 0} Devices
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Device ID</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+
+                    // Check if devices exists and is an array
+                    if (Array.isArray(lane.devices) && lane.devices.length > 0) {
+                        lane.devices.forEach(device => {
+                            htmlContent += `
+                                <tr>
+                                    <td>${device.device_id || 'N/A'}</td>
+                                    <td>${device.device_type || 'N/A'}</td>
+                                    <td>
+                                        <span class="badge ${device.status === 'healthy' ? 'bg-success' : 'bg-danger'}">
+                                            ${device.status || 'unknown'}
+                                        </span>
+                                    </td>
+                                </tr>`;
+                        });
+                    } else {
+                        htmlContent += `
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    No devices found for this lane
+                                </td>
+                            </tr>`;
+                    }
+
+                    htmlContent += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                htmlContent += '</div>';
+            } else {
+                htmlContent += `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No lane details available
+                    </div>`;
+            }
+
+            responseBox.innerHTML = htmlContent;
         } catch (error) {
-            responseBox.textContent = `Error: ${error.message}`;
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error: ${error.message}
+                </div>
+            `;
         }
     });
 });
