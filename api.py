@@ -1,10 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from flask_restx import Api, Resource, fields
 from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog, BarrierLog
 from datetime import datetime
 import json
 from functools import wraps
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 # Create Blueprint
 api_bp = Blueprint('api', __name__)
@@ -709,3 +709,8 @@ class UserManagementById(Resource):
                 'status': 'error',
                 'message': f'Error updating user: {str(e)}'
             }, 500 
+
+@api_bp.route('/ai-help')
+@login_required
+def ai_help():
+    return render_template('ai_help.html') 
