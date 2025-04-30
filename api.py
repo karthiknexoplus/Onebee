@@ -55,6 +55,19 @@ api = Api(api_bp,
             .swagger-ui .opblock .opblock-summary-method {
                 background: #343a40;
             }
+            .external-url-input {
+                margin: 10px 0;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                width: 100%;
+            }
+            .url-input-container {
+                margin: 10px 0;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 4px;
+            }
         </style>
     </head>
     <body>
@@ -76,7 +89,64 @@ api = Api(api_bp,
                     ],
                     layout: "StandaloneLayout",
                     docExpansion: "list",
-                    defaultModelsExpandDepth: -1
+                    defaultModelsExpandDepth: -1,
+                    onComplete: function() {
+                        // Add URL input field for Vehicle Presence API
+                        const vehiclePresenceOp = document.querySelector('.opblock[data-path="/vehicle/presence"]');
+                        if (vehiclePresenceOp) {
+                            const executeDiv = vehiclePresenceOp.querySelector('.execute-wrapper');
+                            if (executeDiv) {
+                                const urlInputContainer = document.createElement('div');
+                                urlInputContainer.className = 'url-input-container';
+                                urlInputContainer.innerHTML = `
+                                    <label for="external-url">External Server URL:</label>
+                                    <input type="text" id="external-url" class="external-url-input" 
+                                           placeholder="Enter external server URL (e.g., http://external-server.com/api/vehicle/presence)">
+                                `;
+                                executeDiv.parentNode.insertBefore(urlInputContainer, executeDiv);
+
+                                // Override the execute button click
+                                const executeBtn = executeDiv.querySelector('.btn.execute');
+                                if (executeBtn) {
+                                    const originalClick = executeBtn.onclick;
+                                    executeBtn.onclick = function(e) {
+                                        const externalUrl = document.getElementById('external-url').value;
+                                        if (externalUrl) {
+                                            // Get the request body
+                                            const requestBody = vehiclePresenceOp.querySelector('.body-param__example textarea').value;
+                                            
+                                            // Send request to external URL
+                                            fetch(externalUrl, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: requestBody
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                // Update the response section
+                                                const responseDiv = vehiclePresenceOp.querySelector('.responses-wrapper');
+                                                if (responseDiv) {
+                                                    const responseBody = responseDiv.querySelector('.highlight-code');
+                                                    if (responseBody) {
+                                                        responseBody.textContent = JSON.stringify(data, null, 2);
+                                                    }
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Error:', error);
+                                                alert('Error sending request to external server: ' + error.message);
+                                            });
+                                        } else {
+                                            // Use original behavior if no external URL
+                                            originalClick.call(this, e);
+                                        }
+                                    };
+                                }
+                            }
+                        }
+                    }
                 });
                 window.ui = ui;
             };
