@@ -7,7 +7,7 @@
     <!-- Summary Cards -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
+            <div class="card bg-primary text-white cursor-pointer" data-bs-toggle="modal" data-bs-target="#usersModal">
                 <div class="card-body">
                     <h5 class="card-title">Total Users</h5>
                     <h2 class="card-text">{{ users|length }}</h2>
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
+            <div class="card bg-success text-white cursor-pointer" data-bs-toggle="modal" data-bs-target="#lanesModal">
                 <div class="card-body">
                     <h5 class="card-title">Total Lanes</h5>
                     <h2 class="card-text">{{ lanes|length }}</h2>
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-info text-white">
+            <div class="card bg-info text-white cursor-pointer" data-bs-toggle="modal" data-bs-target="#locationsModal">
                 <div class="card-body">
                     <h5 class="card-title">Total Locations</h5>
                     <h2 class="card-text">{{ locations|length }}</h2>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
+            <div class="card bg-warning text-white cursor-pointer" data-bs-toggle="modal" data-bs-target="#todayAccessModal">
                 <div class="card-body">
                     <h5 class="card-title">Today's Access</h5>
                     <h2 class="card-text">{{ today_access }}</h2>
@@ -321,5 +321,253 @@
             }]
         }
     });
+
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                placement: 'top'
+            })
+        })
+    });
 </script>
+
+<!-- Locations Modal -->
+<div class="modal fade" id="locationsModal" tabindex="-1" aria-labelledby="locationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="locationsModalLabel">Location Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>Lanes</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for location in locations %}
+                            <tr>
+                                <td>{{ location.name }}</td>
+                                <td>{{ location.address }}</td>
+                                <td>
+                                    <span class="badge bg-info cursor-pointer" 
+                                          data-bs-toggle="tooltip" 
+                                          data-bs-html="true"
+                                          title="{% for lane in location.lanes %}
+                                                 <strong>Lane {{ loop.index }}:</strong><br>
+                                                 <strong>Name:</strong> {{ lane.name }}<br>
+                                                 <strong>Type:</strong> {{ lane.lane_type|title }}<br>
+                                                 <strong>Status:</strong> {{ lane.status|title }}<br>
+                                                 <strong>Devices:</strong> {{ lane.devices|length }}<br>
+                                                 <strong>Last Updated:</strong> {{ lane.updated_at.strftime('%Y-%m-%d %H:%M') }}<br>
+                                                 {% if not loop.last %}<hr class='my-1'>{% endif %}
+                                                 {% endfor %}">
+                                        {{ location.lanes|length }} Lanes
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if location.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ 'Active' if location.is_active else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>{{ location.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lanes Modal -->
+<div class="modal fade" id="lanesModal" tabindex="-1" aria-labelledby="lanesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lanesModalLabel">Lane Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Devices</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lane in lanes %}
+                            <tr>
+                                <td>{{ lane.name }}</td>
+                                <td>{{ lane.location.name }}</td>
+                                <td>{{ lane.lane_type|title }}</td>
+                                <td>
+                                    <span class="badge {% if lane.status == 'active' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ lane.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% for device in lane.devices %}
+                                    <span class="badge bg-secondary device-badge" 
+                                          data-bs-toggle="tooltip" 
+                                          data-bs-html="true"
+                                          title="<strong>ID:</strong> {{ device.id }}<br>
+                                                 <strong>Name:</strong> {{ device.name }}<br>
+                                                 <strong>IP:</strong> {{ device.ip_address }}<br>
+                                                 <strong>Port:</strong> {{ device.port }}<br>
+                                                 <strong>Type:</strong> {{ device.device_type|title }}<br>
+                                                 <strong>Status:</strong> {{ device.status|title }}<br>
+                                                 <strong>Last Heartbeat:</strong> {{ device.last_heartbeat.strftime('%Y-%m-%d %H:%M') if device.last_heartbeat else 'Never' }}">
+                                        {{ device.device_type|title }}
+                                    </span>
+                                    {% endfor %}
+                                </td>
+                                <td>{{ lane.updated_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Modal -->
+<div class="modal fade" id="usersModal" tabindex="-1" aria-labelledby="usersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="usersModalLabel">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Vehicle Number</th>
+                                <th>Vehicle Type</th>
+                                <th>Status</th>
+                                <th>Last Access</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.vehicle_number }}</td>
+                                <td>{{ user.vehicle_type|title }}</td>
+                                <td>
+                                    <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ 'Active' if user.is_active else 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td>{{ user.last_access.strftime('%Y-%m-%d %H:%M') if user.last_access else 'Never' }}</td>
+                                <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Access Modal -->
+<div class="modal fade" id="todayAccessModal" tabindex="-1" aria-labelledby="todayAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="todayAccessModalLabel">Today's Access Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Vehicle Number</th>
+                                <th>Location</th>
+                                <th>Lane</th>
+                                <th>Status</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in today_logs %}
+                            <tr>
+                                <td>{{ log.timestamp.strftime('%H:%M:%S') }}</td>
+                                <td>{{ log.vehicle_number }}</td>
+                                <td>{{ log.location }}</td>
+                                <td>{{ log.lane }}</td>
+                                <td>
+                                    <span class="badge {% if log.status == 'granted' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ log.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ log.reason if log.reason else '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cursor-pointer {
+    cursor: pointer;
+}
+.cursor-pointer:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+}
+.device-badge {
+    cursor: help;
+    margin-right: 5px;
+}
+.badge.bg-info {
+    cursor: help;
+}
+.badge.bg-info:hover {
+    opacity: 0.9;
+}
+</style>
 {% endblock %} 
