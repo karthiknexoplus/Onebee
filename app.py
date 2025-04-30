@@ -1176,5 +1176,17 @@ def internal_error(error):
     flash('An unexpected error occurred')
     return redirect(url_for('index'))
 
+@app.route('/lanes/detail')
+@login_required
+def lanes_detail():
+    lanes = Lane.query.all()
+    return render_template('lanes_detail.html', lanes=lanes)
+
+@app.route('/locations/detail')
+@login_required
+def locations_detail():
+    locations = Location.query.all()
+    return render_template('locations_detail.html', locations=locations)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True) 

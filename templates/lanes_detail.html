@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Lanes Detail - Access Control{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Lanes Overview</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="window.history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Lanes</h5>
+                    <h2 class="card-text">{{ lanes|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Active Lanes</h5>
+                    <h2 class="card-text">{{ lanes|selectattr('status', 'equalto', 'active')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Entry Lanes</h5>
+                    <h2 class="card-text">{{ lanes|selectattr('lane_type', 'equalto', 'entry')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Exit Lanes</h5>
+                    <h2 class="card-text">{{ lanes|selectattr('lane_type', 'equalto', 'exit')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lanes Grid -->
+    <div class="row">
+        {% for lane in lanes %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-road me-2"></i>{{ lane.name }}
+                    </h5>
+                    <span class="badge {% if lane.status == 'active' %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ lane.status|title }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Location</h6>
+                        <p class="mb-0">{{ lane.location.name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Lane Type</h6>
+                        <p class="mb-0">
+                            <span class="badge {% if lane.lane_type == 'entry' %}bg-primary{% else %}bg-info{% endif %}">
+                                {{ lane.lane_type|title }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Devices</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if lane.fastag_reader %}
+                            <span class="badge bg-primary" title="ID: {{ lane.fastag_reader.id }}">
+                                <i class="fas fa-upc me-1"></i>Fastag Reader
+                            </span>
+                            {% endif %}
+                            {% if lane.controller %}
+                            <span class="badge bg-success" title="ID: {{ lane.controller.id }}">
+                                <i class="fas fa-microchip me-1"></i>Controller
+                            </span>
+                            {% endif %}
+                            {% if lane.anpr_camera %}
+                            <span class="badge bg-info" title="ID: {{ lane.anpr_camera.id }}">
+                                <i class="fas fa-camera me-1"></i>ANPR Camera
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Last Updated</h6>
+                        <p class="mb-0">{{ lane.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">ID: {{ lane.id }}</small>
+                        <button class="btn btn-sm btn-primary" onclick="viewLaneDetails('{{ lane.id }}')">
+                            <i class="fas fa-eye me-1"></i>View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Lane Details Modal -->
+<div class="modal fade" id="laneDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lane Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="laneDetailsContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.5em 0.8em;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+</style>
+
+<script>
+function viewLaneDetails(laneId) {
+    fetch(`/api/lanes/${laneId}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = new bootstrap.Modal(document.getElementById('laneDetailsModal'));
+            document.getElementById('laneDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Basic Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Name:</th>
+                                <td>${data.name}</td>
+                            </tr>
+                            <tr>
+                                <th>Type:</th>
+                                <td>${data.lane_type}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td><span class="badge ${data.status === 'active' ? 'bg-success' : 'bg-danger'}">${data.status}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Devices</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                ${data.fastag_reader ? `
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Fastag Reader</h6>
+                                    <p class="mb-1">ID: ${data.fastag_reader.id}</p>
+                                    <p class="mb-1">IP: ${data.fastag_reader.ip_address}</p>
+                                    <p class="mb-1">Port: ${data.fastag_reader.port}</p>
+                                    <p class="mb-0">Status: <span class="badge ${data.fastag_reader.is_enabled ? 'bg-success' : 'bg-danger'}">${data.fastag_reader.is_enabled ? 'Active' : 'Inactive'}</span></p>
+                                </div>
+                                ` : ''}
+                                ${data.controller ? `
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Controller</h6>
+                                    <p class="mb-1">ID: ${data.controller.id}</p>
+                                    <p class="mb-1">IP: ${data.controller.ip_address}</p>
+                                    <p class="mb-1">Port: ${data.controller.port}</p>
+                                    <p class="mb-0">Status: <span class="badge ${data.controller.is_enabled ? 'bg-success' : 'bg-danger'}">${data.controller.is_enabled ? 'Active' : 'Inactive'}</span></p>
+                                </div>
+                                ` : ''}
+                                ${data.anpr_camera ? `
+                                <div class="mb-3">
+                                    <h6 class="mb-2">ANPR Camera</h6>
+                                    <p class="mb-1">ID: ${data.anpr_camera.id}</p>
+                                    <p class="mb-1">IP: ${data.anpr_camera.ip_address}</p>
+                                    <p class="mb-1">Port: ${data.anpr_camera.port}</p>
+                                    <p class="mb-0">Status: <span class="badge ${data.anpr_camera.is_enabled ? 'bg-success' : 'bg-danger'}">${data.anpr_camera.is_enabled ? 'Active' : 'Inactive'}</span></p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('laneDetailsContent').innerHTML = `
+                <div class="alert alert-danger">
+                    Error loading lane details. Please try again.
+                </div>
+            `;
+        });
+}
+</script>
+{% endblock %} 

@@ -1,607 +1,1267 @@
 {% extends "base.html" %}
 
-{% block title %}API Test Interface{% endblock %}
+{% block title %}API Test - Access Control{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-code me-2"></i>API Test Interface
-                    </h5>
-                    <div class="dropdown">
-                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="apiVersionDropdown" data-bs-toggle="dropdown">
-                            <i class="fas fa-code-branch me-2"></i>v1.0
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#" data-version="v1.0">v1.0 (Current)</a></li>
-                            <li><a class="dropdown-item" href="#" data-version="v0.9">v0.9 (Legacy)</a></li>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">API Test Interface</h2>
+        <div class="api-status">
+            <span class="status-indicator active"></span>
+            <span class="status-text">API Server Online</span>
+        </div>
+    </div>
+
+    <div class="alert alert-info mb-4">
+        <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>How to Use</h5>
+        <p class="mb-0">Fill in the form fields with the required data and click the "Test" button to send the request. The response will be displayed in the response box below each form.</p>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light rounded mb-4">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#apiNavigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="apiNavigation">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="vehicleApisDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-car me-1"></i>Vehicle APIs
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#vehiclePresenceApi">Vehicle Presence</a></li>
+                            <li><a class="dropdown-item" href="#anprApi">ANPR</a></li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#barrierControlApi">
+                            <i class="fas fa-door-open me-1"></i>Barrier Control
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="systemApisDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-cogs me-1"></i>System APIs
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#healthCheckApi">Health Check</a></li>
+                            <li><a class="dropdown-item" href="#laneDeviceCountsApi">Lane Device Counts</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#userManagementApi">
+                            <i class="fas fa-users me-1"></i>User Management
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Vehicle Presence API -->
+    <div class="card mb-4 api-card" id="vehiclePresenceApi">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-car me-2"></i>Vehicle Presence API
+            </h5>
+            <span class="badge bg-primary">POST /api/vehicle/presence</span>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 101,
+    "confidence": 95.5,
+    "status": "active",
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="vehiclePresenceForm" class="api-form">
+                <div class="row g-3">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="externalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="externalUrl">External Server URL (Optional)</label>
+                        </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="laneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="laneId">Lane ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="deviceId" name="device_id" placeholder="Device ID" value="101" required>
+                            <label for="deviceId">Device ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="confidence" name="confidence" min="0" max="100" placeholder="Confidence" value="95.5" required>
+                            <label for="confidence">Confidence</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="active" selected>Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <label for="status">Status</label>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="list-group" id="api-list">
-                                <a href="#" class="list-group-item list-group-item-action active" data-api="vehicle-presence">
-                                    <i class="fas fa-car me-2"></i>Vehicle Presence
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action" data-api="vehicle-anpr">
-                                    <i class="fas fa-camera me-2"></i>Vehicle ANPR
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action" data-api="barrier-control">
-                                    <i class="fas fa-door-open me-2"></i>Barrier Control
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action" data-api="health-check">
-                                    <i class="fas fa-heartbeat me-2"></i>Health Check
-                                </a>
-                            </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test Vehicle Presence API
+                    </button>
+                </div>
+            </form>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="vehiclePresenceResponse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANPR API -->
+    <div class="card mb-4 api-card" id="anprApi">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-camera me-2"></i>ANPR API
+            </h5>
+            <span class="badge bg-primary">POST /api/vehicle/anpr</span>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,
+    "device_id": 102,
+    "vehicle_number": "ABC123",
+    "confidence": 98.2,
+    "timestamp": "2024-04-16T15:30:00Z"
+}</pre>
+            </div>
+            <form id="anprForm" class="api-form">
+                <div class="row g-3">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="anprExternalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="anprExternalUrl">External Server URL (Optional)</label>
                         </div>
-                        <div class="col-md-9">
-                            <div id="api-content">
-                                <div class="api-section" id="vehicle-presence">
-                                    <h5 class="mb-3">Vehicle Presence API</h5>
-                                    <div class="alert alert-info">
-                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
-                                        <p class="mb-0">Send vehicle presence data to this endpoint:</p>
-                                        <div class="bg-light p-2 rounded mt-2">
-                                            <code>POST http://192.168.1.3:5000/api/vehicle/presence</code>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "presence": true,
-    "confidence": 0.95
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
-                                        <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/vehicle/presence \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d '{
-        "lane_id": "L1",
-        "device_id": "D1",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "presence": true,
-        "confidence": 0.95
-    }'</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "success": true,
-    "message": "Vehicle presence recorded",
-    "data": {
-        "lane_id": "L1",
-        "device_id": "D1",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "presence": true,
-        "confidence": 0.95,
-        "status": "active"
-    }
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Lane ID must be a valid lane identifier</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Device ID must be a valid device identifier</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Confidence must be between 0 and 1</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-play-circle me-2"></i>Test This API</h6>
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <form id="vehicle-presence-form">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Request Body</label>
-                                                        <textarea class="form-control" rows="6" id="vehicle-presence-request">{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "presence": true,
-    "confidence": 0.95
-}</textarea>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">API Key</label>
-                                                        <input type="text" class="form-control" id="vehicle-presence-api-key" placeholder="Enter your API key">
-                                                    </div>
-                                                    <div class="d-flex gap-2">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-paper-plane me-2"></i>Send Request
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary" id="vehicle-presence-listen">
-                                                            <i class="fas fa-headphones me-2"></i>Start Listener
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger" id="vehicle-presence-stop-listen" style="display: none;">
-                                                            <i class="fas fa-stop me-2"></i>Stop Listener
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                                <div class="mt-3">
-                                                    <h6>Response</h6>
-                                                    <pre class="bg-light p-3 rounded" id="vehicle-presence-response">No response yet</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="anprLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="anprLaneId">Lane ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="anprDeviceId" name="device_id" placeholder="Device ID" value="102" required>
+                            <label for="anprDeviceId">Device ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="vehicleNumber" name="vehicle_number" placeholder="Vehicle Number" value="ABC123" required>
+                            <label for="vehicleNumber">Vehicle Number</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="anprConfidence" name="confidence" min="0" max="100" placeholder="Confidence" value="98.2" required>
+                            <label for="anprConfidence">Confidence</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test ANPR API
+                    </button>
+                </div>
+            </form>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="anprResponse"></div>
+            </div>
+        </div>
+    </div>
 
-                                <div class="api-section" id="vehicle-anpr" style="display: none;">
-                                    <h5 class="mb-3">Vehicle ANPR API</h5>
-                                    <div class="alert alert-info">
-                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
-                                        <p class="mb-0">Send ANPR (Automatic Number Plate Recognition) data to this endpoint:</p>
-                                        <div class="bg-light p-2 rounded mt-2">
-                                            <code>POST http://192.168.1.3:5000/api/vehicle/anpr</code>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "image_url": "http://example.com/image.jpg",
-    "plate_number": "ABC123",
-    "confidence": 0.95,
-    "vehicle_type": "car",
-    "vehicle_color": "white"
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
-                                        <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/vehicle/anpr \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d '{
-        "lane_id": "L1",
-        "device_id": "D1",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "image_url": "http://example.com/image.jpg",
-        "plate_number": "ABC123",
-        "confidence": 0.95,
-        "vehicle_type": "car",
-        "vehicle_color": "white"
-    }'</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "success": true,
-    "message": "ANPR data recorded",
-    "data": {
-        "lane_id": "L1",
-        "device_id": "D1",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "plate_number": "ABC123",
-        "confidence": 0.95,
-        "vehicle_type": "car",
-        "vehicle_color": "white",
-        "access_granted": true,
-        "user_details": {
-            "name": "John Doe",
-            "valid_until": "2024-12-31"
-        }
-    }
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Image URL must be accessible</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Confidence must be between 0 and 1</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Vehicle type must be one of: car, truck, bus, motorcycle</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-play-circle me-2"></i>Test This API</h6>
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <form id="vehicle-anpr-form">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Request Body</label>
-                                                        <textarea class="form-control" rows="6" id="vehicle-anpr-request">{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "image_url": "http://example.com/image.jpg",
-    "plate_number": "ABC123",
-    "confidence": 0.95,
-    "vehicle_type": "car",
-    "vehicle_color": "white"
-}</textarea>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">API Key</label>
-                                                        <input type="text" class="form-control" id="vehicle-anpr-api-key" placeholder="Enter your API key">
-                                                    </div>
-                                                    <div class="d-flex gap-2">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-paper-plane me-2"></i>Send Request
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary" id="vehicle-anpr-listen">
-                                                            <i class="fas fa-headphones me-2"></i>Start Listener
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger" id="vehicle-anpr-stop-listen" style="display: none;">
-                                                            <i class="fas fa-stop me-2"></i>Stop Listener
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                                <div class="mt-3">
-                                                    <h6>Response</h6>
-                                                    <pre class="bg-light p-3 rounded" id="vehicle-anpr-response">No response yet</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+    <!-- Barrier Control API -->
+    <div class="card mb-4 api-card" id="barrierControlApi">
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-door-open me-2"></i>Barrier Control API
+            </h5>
+            <span class="badge bg-primary">POST /api/barrier/control</span>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                <p class="mb-2">Send barrier control commands to this endpoint:</p>
+                <div class="bg-light p-2 rounded mb-2">
+                    <code>POST http://192.168.1.3:5000/api/barrier/control</code>
+                </div>
+                <p class="mb-0">This endpoint accepts POST requests with barrier control commands in JSON format.</p>
+            </div>
 
-                                <div class="api-section" id="barrier-control" style="display: none;">
-                                    <h5 class="mb-3">Barrier Control API</h5>
-                                    <div class="alert alert-info">
-                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
-                                        <p class="mb-0">Send barrier control commands to this endpoint:</p>
-                                        <div class="bg-light p-2 rounded mt-2">
-                                            <code>POST http://192.168.1.3:5000/api/barrier/control</code>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "lane_id": "L1",
-    "device_id": "D1",
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Request Format:</h6>
+                <p class="mb-2">Send a JSON payload with the following structure:</p>
+                <pre class="mb-0">{
+    "lane_id": 1,                    // Integer: ID of the lane
+    "device_id": 103,                // Integer: ID of the barrier controller
+    "action": "open",                // String: "open" or "close"
+    "timestamp": "2024-04-16T15:30:00Z"  // ISO 8601 timestamp
+}</pre>
+            </div>
+
+            <div class="alert alert-warning mb-3">
+                <h6 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Important Notes:</h6>
+                <ul class="mb-0">
+                    <li>Send data using POST method to the URL above</li>
+                    <li>Set Content-Type header to 'application/json'</li>
+                    <li>All fields are required</li>
+                    <li>Timestamp should be in ISO 8601 format</li>
+                    <li>Action must be either "open" or "close"</li>
+                </ul>
+            </div>
+
+            <div class="alert alert-success mb-3">
+                <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Example cURL Commands:</h6>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>Basic Request:</strong></p>
+                    <pre class="mb-2">curl -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lane_id": 1,
+    "device_id": 103,
     "action": "open",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "reason": "authorized_access",
-    "operator_id": "OP001"
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
-                                        <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/barrier/control \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d '{
-        "lane_id": "L1",
-        "device_id": "D1",
-        "action": "open",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "reason": "authorized_access",
-        "operator_id": "OP001"
-    }'</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "success": true,
+    "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>With Additional Headers:</strong></p>
+                    <pre class="mb-2">curl -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer your-token-here" \
+  -d '{
+    "lane_id": 1,
+    "device_id": 103,
+    "action": "open",
+    "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>With Verbose Output:</strong></p>
+                    <pre class="mb-0">curl -v -X POST http://192.168.1.3:5000/api/barrier/control \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "lane_id": 1,
+    "device_id": 103,
+    "action": "open",
+    "timestamp": "2024-04-16T15:30:00Z"
+  }'</pre>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Options explained:
+                        <ul class="mb-0">
+                            <li><code>-X POST</code>: Specifies the HTTP method</li>
+                            <li><code>-H</code>: Adds HTTP headers</li>
+                            <li><code>-d</code>: Specifies the request body data</li>
+                            <li><code>-v</code>: Enables verbose output (shows headers, etc.)</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Expected Response:</h6>
+                <pre class="mb-0">{
+    "status": "success",
     "message": "Barrier command received",
     "data": {
-        "lane_id": "L1",
-        "device_id": "D1",
+        "lane_id": 1,
+        "device_id": 103,
         "action": "open",
-        "timestamp": "2024-02-20T10:30:00Z",
-        "status": "executing",
-        "command_id": "CMD123456",
-        "estimated_completion": "2024-02-20T10:30:05Z"
+        "timestamp": "2024-04-16T15:30:00Z",
+        "execution_status": "pending"
     }
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Action must be either "open" or "close"</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Device must be online and accessible</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Reason must be one of: authorized_access, maintenance, emergency, manual_override</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-play-circle me-2"></i>Test This API</h6>
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <form id="barrier-control-form">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Request Body</label>
-                                                        <textarea class="form-control" rows="6" id="barrier-control-request">{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "action": "open",
-    "timestamp": "2024-02-20T10:30:00Z",
-    "reason": "authorized_access",
-    "operator_id": "OP001"
-}</textarea>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">API Key</label>
-                                                        <input type="text" class="form-control" id="barrier-control-api-key" placeholder="Enter your API key">
-                                                    </div>
-                                                    <div class="d-flex gap-2">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-paper-plane me-2"></i>Send Request
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary" id="barrier-control-listen">
-                                                            <i class="fas fa-headphones me-2"></i>Start Listener
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger" id="barrier-control-stop-listen" style="display: none;">
-                                                            <i class="fas fa-stop me-2"></i>Stop Listener
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                                <div class="mt-3">
-                                                    <h6>Response</h6>
-                                                    <pre class="bg-light p-3 rounded" id="barrier-control-response">No response yet</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+}</pre>
+            </div>
 
-                                <div class="api-section" id="health-check" style="display: none;">
-                                    <h5 class="mb-3">Health Check API</h5>
-                                    <div class="alert alert-info">
-                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
-                                        <p class="mb-0">Send device health status updates to this endpoint:</p>
-                                        <div class="bg-light p-2 rounded mt-2">
-                                            <code>POST http://192.168.1.3:5000/api/health/check</code>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "device_type": "barrier",
-    "status": "online",
-    "last_heartbeat": "2024-02-20T10:30:00Z",
-    "error_message": null,
-    "metrics": {
-        "cpu_usage": 45.2,
-        "memory_usage": 60.8,
-        "temperature": 35.6,
-        "uptime": 86400
-    }
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
-                                        <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/health/check \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -d '{
-        "lane_id": "L1",
-        "device_id": "D1",
-        "device_type": "barrier",
-        "status": "online",
-        "last_heartbeat": "2024-02-20T10:30:00Z",
-        "error_message": null,
-        "metrics": {
-            "cpu_usage": 45.2,
-            "memory_usage": 60.8,
-            "temperature": 35.6,
-            "uptime": 86400
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-primary" id="startBarrierListener">
+                            <i class="fas fa-play me-2"></i>Start Listening
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="stopBarrierListener" disabled>
+                            <i class="fas fa-stop me-2"></i>Stop Listening
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="barrierControlResponse">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Click "Start Listening" to begin receiving barrier control commands
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Check API -->
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-heartbeat me-2"></i>Health Check API
+            </h5>
+            <span class="badge bg-primary">POST /api/health/check</span>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Example Data:</h6>
+                <pre class="mb-0">{
+    "lane_id": 1,                    // Integer: ID of the lane
+    "device_id": 104,                // Integer: ID of the device
+    "device_type": "sensor",         // String: Type of device (sensor/anpr/controller)
+    "status": "healthy",             // String: Device status (healthy/unhealthy)
+    "last_heartbeat": "2024-04-16T15:30:00Z",  // ISO 8601 timestamp
+    "error_message": null            // String or null: Error details if any
+}</pre>
+            </div>
+            <form id="healthCheckForm" class="api-form">
+                <div class="row g-3">
+                    <div class="col-md-12 mb-3">
+                        <div class="form-floating">
+                            <input type="url" class="form-control" id="healthExternalUrl" name="external_url" placeholder="External Server URL">
+                            <label for="healthExternalUrl">External Server URL (Optional)</label>
+                        </div>
+                        <small class="text-muted">Leave empty to test local API endpoint</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="healthLaneId" name="lane_id" placeholder="Lane ID" value="1" required>
+                            <label for="healthLaneId">Lane ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="healthDeviceId" name="device_id" placeholder="Device ID" value="104" required>
+                            <label for="healthDeviceId">Device ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="deviceType" name="device_type" required>
+                                <option value="sensor" selected>Sensor</option>
+                                <option value="anpr">ANPR</option>
+                                <option value="controller">Controller</option>
+                            </select>
+                            <label for="deviceType">Device Type</label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="healthStatus" name="status" required>
+                                <option value="healthy" selected>Healthy</option>
+                                <option value="unhealthy">Unhealthy</option>
+                            </select>
+                            <label for="healthStatus">Status</label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="errorMessage" name="error_message" placeholder="Error Message">
+                            <label for="errorMessage">Error Message (Optional)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Test Health Check API
+                    </button>
+                </div>
+            </form>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="healthCheckResponse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lane Device Counts API -->
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Lane Device Counts API
+            </h5>
+            <span class="badge bg-primary">GET /api/lane-device-counts</span>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-3">
+                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                <p class="mb-2">This endpoint retrieves the current counts of lanes and their associated devices from the database.</p>
+                <div class="bg-light p-2 rounded mb-2">
+                    <code>GET http://192.168.1.3:5000/api/lane-device-counts</code>
+                </div>
+                <p class="mb-0">No request body or parameters required. Simply make a GET request to the endpoint.</p>
+            </div>
+
+            <div class="alert alert-secondary mb-3">
+                <h6 class="alert-heading">Expected Response Format:</h6>
+                <p class="mb-2">The API will return a JSON response with the following structure:</p>
+                <pre class="mb-0">{
+    "total_lanes": 5,                // Integer: Total number of lanes
+    "total_devices": 15,             // Integer: Total number of devices
+    "lane_details": [                // Array of lane information
+        {
+            "lane_id": 1,            // Integer: Unique identifier for the lane
+            "device_count": 3,        // Integer: Number of devices in this lane
+            "devices": [              // Array of devices in this lane
+                {
+                    "device_id": 101,         // Integer: Unique identifier for the device
+                    "device_type": "sensor",  // String: Type of device (sensor/anpr/controller)
+                    "status": "healthy"       // String: Device status (healthy/unhealthy)
+                },
+                {
+                    "device_id": 102,
+                    "device_type": "anpr",
+                    "status": "healthy"
+                },
+                {
+                    "device_id": 103,
+                    "device_type": "controller",
+                    "status": "healthy"
+                }
+            ]
         }
-    }'</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
-                                        <pre class="bg-light p-3 rounded"><code>{
-    "success": true,
-    "message": "Health check received",
-    "data": {
-        "lane_id": "L1",
-        "device_id": "D1",
-        "device_type": "barrier",
-        "status": "online",
-        "last_heartbeat": "2024-02-20T10:30:00Z",
-        "error_message": null,
-        "metrics": {
-            "cpu_usage": 45.2,
-            "memory_usage": 60.8,
-            "temperature": 35.6,
-            "uptime": 86400
-        },
-        "health_score": 95,
-        "recommendations": [
-            "System performing well",
-            "No maintenance required"
-        ]
-    }
-}</code></pre>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
-                                        <ul class="list-unstyled">
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Device type must be one of: barrier, camera, sensor</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Status must be one of: online, offline, error, maintenance</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Last heartbeat must be in ISO 8601 format</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Metrics are optional but recommended</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
-                                        </ul>
-                                    </div>
-                                    <div class="mb-3">
-                                        <h6><i class="fas fa-play-circle me-2"></i>Test This API</h6>
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <form id="health-check-form">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Request Body</label>
-                                                        <textarea class="form-control" rows="6" id="health-check-request">{
-    "lane_id": "L1",
-    "device_id": "D1",
-    "device_type": "barrier",
-    "status": "online",
-    "last_heartbeat": "2024-02-20T10:30:00Z",
-    "error_message": null,
-    "metrics": {
-        "cpu_usage": 45.2,
-        "memory_usage": 60.8,
-        "temperature": 35.6,
-        "uptime": 86400
-    }
-}</textarea>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">API Key</label>
-                                                        <input type="text" class="form-control" id="health-check-api-key" placeholder="Enter your API key">
-                                                    </div>
-                                                    <div class="d-flex gap-2">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-paper-plane me-2"></i>Send Request
-                                                        </button>
-                                                        <button type="button" class="btn btn-secondary" id="health-check-listen">
-                                                            <i class="fas fa-headphones me-2"></i>Start Listener
-                                                        </button>
-                                                        <button type="button" class="btn btn-danger" id="health-check-stop-listen" style="display: none;">
-                                                            <i class="fas fa-stop me-2"></i>Stop Listener
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                                <div class="mt-3">
-                                                    <h6>Response</h6>
-                                                    <pre class="bg-light p-3 rounded" id="health-check-response">No response yet</pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+        // ... more lanes
+    ]
+}</pre>
+            </div>
+
+            <div class="alert alert-success mb-3">
+                <h6 class="alert-heading"><i class="fas fa-check-circle me-2"></i>Example cURL Commands:</h6>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>Basic Request:</strong></p>
+                    <pre class="mb-2">curl -X GET http://192.168.1.3:5000/api/lane-device-counts</pre>
+                </div>
+                <div class="mb-2">
+                    <p class="mb-1"><strong>With Headers:</strong></p>
+                    <pre class="mb-2">curl -X GET http://192.168.1.3:5000/api/lane-device-counts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"</pre>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>With Verbose Output:</strong></p>
+                    <pre class="mb-0">curl -v -X GET http://192.168.1.3:5000/api/lane-device-counts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"</pre>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Options explained:
+                        <ul class="mb-0">
+                            <li><code>-X GET</code>: Specifies the HTTP method</li>
+                            <li><code>-H</code>: Adds HTTP headers</li>
+                            <li><code>-v</code>: Enables verbose output (shows headers, etc.)</li>
+                        </ul>
+                    </small>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-primary" id="getLaneDeviceCounts">
+                            <i class="fas fa-sync-alt me-2"></i>Refresh Counts
+                        </button>
+                        <div class="text-muted">
+                            <small>Last updated: <span id="lastUpdated">Never</span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="response-container mt-3">
+                <div class="response-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Response</h6>
+                    <div class="response-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                </div>
+                <div class="response-box" id="laneDeviceCountsResponse">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Click "Refresh Counts" to fetch current lane and device data
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management API -->
+    <div class="card mb-4 api-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-users me-2"></i>User Management API
+            </h5>
+            <div>
+                <span class="badge bg-primary">POST /api/users</span>
+                <span class="badge bg-success">PUT /api/users/{id}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Add User Section -->
+            <div class="mb-4">
+                <h6 class="mb-3">Add User</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="userName" value="John Doe">
+                            <label for="userName">Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="userDesignation" value="Employee">
+                            <label for="userDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="vehicleNumber" value="KA 01 AB 1234">
+                            <label for="vehicleNumber">Vehicle Number</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="fastagId" value="FASTAG123456">
+                            <label for="fastagId">Fastag ID</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="locationId" value="1">
+                            <label for="locationId">Location ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="kycType" value="Aadhar">
+                            <label for="kycType">KYC Document Type</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="kycNumber" value="123456789012">
+                            <label for="kycNumber">KYC Document Number</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="isActive">
+                                <option value="true" selected>Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <label for="isActive">Status</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="validFrom" value="2024-04-01">
+                            <label for="validFrom">Valid From</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" id="validTo" value="2025-03-31">
+                            <label for="validTo">Valid To</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Access Permissions</h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="permissionLaneId" value="1">
+                                <label for="permissionLaneId">Lane ID</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" id="startTime" value="09:00">
+                                <label for="startTime">Start Time</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="time" class="form-control" id="endTime" value="18:00">
+                                <label for="endTime">End Time</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="daysOfWeek" value="1,2,3,4,5">
+                                <label for="daysOfWeek">Days of Week (1-7)</label>
                             </div>
                         </div>
                     </div>
+                </div>
+                <button class="btn btn-primary" onclick="testAddUser()">
+                    <i class="fas fa-plus me-2"></i>Test Add User
+                </button>
+                <div class="response-box mt-3">
+                    <h6>Response:</h6>
+                    <div class="json-box" id="addUserResponse"></div>
+                </div>
+            </div>
+
+            <!-- Edit User Section -->
+            <div class="mt-4">
+                <h6 class="mb-3">Edit User</h6>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="editUserId" value="1">
+                            <label for="editUserId">User ID to Edit</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editUserName" value="John Doe Updated">
+                            <label for="editUserName">Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editUserDesignation" value="Senior Employee">
+                            <label for="editUserDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="editVehicleNumber" value="KA 01 AB 1234">
+                            <label for="editVehicleNumber">Vehicle Number</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="editLocationId" value="1">
+                            <label for="editLocationId">Location ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select class="form-select" id="editIsActive">
+                                <option value="true" selected>Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                            <label for="editIsActive">Status</label>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="testEditUser()">
+                    <i class="fas fa-edit me-2"></i>Test Edit User
+                </button>
+                <div class="response-box mt-3">
+                    <h6>Response:</h6>
+                    <div class="json-box" id="editUserResponse"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+.api-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.api-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 1rem 1.5rem;
+}
+
+.form-floating {
+    margin-bottom: 0;
+}
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    line-height: 1.25;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+}
+
+.response-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.response-header {
+    margin-bottom: 0.5rem;
+}
+
+.response-box {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    min-height: 100px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background-color: #6c757d;
+}
+
+.status-indicator.active {
+    background-color: #28a745;
+}
+
+.status-indicator.pending {
+    background-color: #ffc107;
+    animation: pulse 1.5s infinite;
+}
+
+.status-indicator.error {
+    background-color: #dc3545;
+}
+
+.status-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.btn-primary {
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+    border-radius: 4px;
+}
+
+.alert-secondary pre {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 0;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const apiList = document.getElementById('api-list');
-    const apiSections = document.querySelectorAll('.api-section');
-    const apiVersionDropdown = document.getElementById('apiVersionDropdown');
-
-    // API endpoints
-    const endpoints = {
-        'vehicle-presence': '/api/vehicle/presence',
-        'vehicle-anpr': '/api/vehicle/anpr',
-        'barrier-control': '/api/barrier/control',
-        'health-check': '/api/health/check'
-    };
-
-    // Event listeners for API navigation
-    apiList.addEventListener('click', function(e) {
-        e.preventDefault();
+    // Helper function to update response status
+    function updateResponseStatus(element, status) {
+        const indicator = element.querySelector('.status-indicator');
+        const text = element.querySelector('.status-text');
         
-        if (e.target.classList.contains('list-group-item')) {
-            const apiId = e.target.dataset.api;
-            
-            apiList.querySelectorAll('.list-group-item').forEach(item => {
-                item.classList.remove('active');
+        indicator.className = 'status-indicator';
+        text.textContent = status;
+        
+        switch(status) {
+            case 'Pending':
+                indicator.classList.add('pending');
+                break;
+            case 'Success':
+                indicator.classList.add('active');
+                break;
+            case 'Error':
+                indicator.classList.add('error');
+                break;
+            default:
+                indicator.classList.add('active');
+        }
+    }
+
+    // Helper function to handle API requests
+    async function handleApiRequest(form, endpoint, responseElement) {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => {
+            if (key === 'lane_id' || key === 'device_id') {
+                data[key] = parseInt(value);
+            } else if (key === 'confidence') {
+                data[key] = parseFloat(value);
+            } else {
+                data[key] = value;
+            }
+        });
+        data.timestamp = new Date().toISOString();
+
+        if (endpoint.includes('health')) {
+            data.device_type = 'sensor';
+            data.last_heartbeat = new Date().toISOString();
+        }
+
+        const statusElement = responseElement.parentElement.querySelector('.response-status');
+        updateResponseStatus(statusElement, 'Pending');
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
-            
-            e.target.classList.add('active');
-            
-            apiSections.forEach(section => {
-                section.style.display = section.id === apiId ? 'block' : 'none';
+
+            const result = await response.json();
+            responseElement.textContent = JSON.stringify(result, null, 2);
+            updateResponseStatus(statusElement, 'Success');
+        } catch (error) {
+            responseElement.textContent = 'Error: ' + error.message;
+            updateResponseStatus(statusElement, 'Error');
+        }
+    }
+
+    // Vehicle Presence API
+    document.getElementById('vehiclePresenceForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const responseBox = document.getElementById('vehiclePresenceResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            confidence: parseFloat(formData.get('confidence')),
+            status: formData.get('status'),
+            timestamp: new Date().toISOString()
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/vehicle/presence', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
         }
     });
 
-    // Handle API version selection
-    apiVersionDropdown.addEventListener('click', function(e) {
+    // ANPR API
+    document.getElementById('anprForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const form = e.target;
+        const responseBox = document.getElementById('anprResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            vehicle_number: formData.get('vehicle_number'),
+            confidence: parseFloat(formData.get('confidence')),
+            timestamp: new Date().toISOString()
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/vehicle/anpr', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+        }
     });
 
-    // Function to send API request
-    function sendRequest(endpoint, requestBody, apiKey) {
-        return fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify(requestBody)
-        }).then(response => response.json());
-    }
+    // Barrier Control API
+    let barrierListenerInterval = null;
+    const startBarrierListener = document.getElementById('startBarrierListener');
+    const stopBarrierListener = document.getElementById('stopBarrierListener');
+    const barrierResponseBox = document.getElementById('barrierControlResponse');
+    const barrierStatusIndicator = document.querySelector('#barrierControlResponse').closest('.response-container').querySelector('.status-indicator');
+    const barrierStatusText = document.querySelector('#barrierControlResponse').closest('.response-container').querySelector('.status-text');
 
-    // Function to start WebSocket listener
-    function startListener(endpoint, responseElement) {
-        const ws = new WebSocket(`ws://192.168.1.3:5000${endpoint}/ws`);
-        
-        ws.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            responseElement.textContent = JSON.stringify(data, null, 2);
-        };
+    startBarrierListener.addEventListener('click', function() {
+        // Disable start button and enable stop button
+        startBarrierListener.disabled = true;
+        stopBarrierListener.disabled = false;
 
-        ws.onerror = function(error) {
-            responseElement.textContent = `Error: ${error.message}`;
-        };
+        // Update status
+        barrierStatusIndicator.className = 'status-indicator pending';
+        barrierStatusText.textContent = 'Listening...';
+        barrierResponseBox.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Waiting for barrier control commands...</div>';
 
-        return ws;
-    }
-
-    // Set up form submissions and listeners for each API
-    Object.keys(endpoints).forEach(apiId => {
-        const form = document.getElementById(`${apiId}-form`);
-        const requestInput = document.getElementById(`${apiId}-request`);
-        const apiKeyInput = document.getElementById(`${apiId}-api-key`);
-        const responseElement = document.getElementById(`${apiId}-response`);
-        const listenButton = document.getElementById(`${apiId}-listen`);
-        const stopListenButton = document.getElementById(`${apiId}-stop-listen`);
-        let ws = null;
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        // Start polling for barrier control commands
+        barrierListenerInterval = setInterval(async () => {
             try {
-                const requestBody = JSON.parse(requestInput.value);
-                const apiKey = apiKeyInput.value;
+                const response = await fetch('/api/barrier/control');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && Object.keys(data).length > 0) {
+                        // Update status
+                        barrierStatusIndicator.className = 'status-indicator success';
+                        barrierStatusText.textContent = 'Command Received';
+                        
+                        // Display the received command
+                        barrierResponseBox.innerHTML = `
+                            <div class="alert alert-success">
+                                <h6 class="alert-heading">Barrier Control Command Received:</h6>
+                                <pre class="mb-0">${JSON.stringify(data, null, 2)}</pre>
+                            </div>
+                        `;
 
-                sendRequest(endpoints[apiId], requestBody, apiKey)
-                    .then(response => {
-                        responseElement.textContent = JSON.stringify(response, null, 2);
-                    })
-                    .catch(error => {
-                        responseElement.textContent = `Error: ${error.message}`;
-                    });
+                        // Optional: Auto-stop after receiving a command
+                        // stopBarrierListener.click();
+                    }
+                }
             } catch (error) {
-                responseElement.textContent = `Error: Invalid JSON in request body`;
+                barrierStatusIndicator.className = 'status-indicator error';
+                barrierStatusText.textContent = 'Error';
+                barrierResponseBox.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
             }
-        });
+        }, 2000); // Poll every 2 seconds
+    });
 
-        listenButton.addEventListener('click', function() {
-            ws = startListener(endpoints[apiId], responseElement);
-            listenButton.style.display = 'none';
-            stopListenButton.style.display = 'inline-block';
-        });
+    stopBarrierListener.addEventListener('click', function() {
+        // Clear the interval
+        if (barrierListenerInterval) {
+            clearInterval(barrierListenerInterval);
+            barrierListenerInterval = null;
+        }
 
-        stopListenButton.addEventListener('click', function() {
-            if (ws) {
-                ws.close();
-                ws = null;
+        // Enable start button and disable stop button
+        startBarrierListener.disabled = false;
+        stopBarrierListener.disabled = true;
+
+        // Update status
+        barrierStatusIndicator.className = 'status-indicator';
+        barrierStatusText.textContent = 'Stopped';
+        barrierResponseBox.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-info-circle me-2"></i>
+                Listening stopped. Click "Start Listening" to begin receiving barrier control commands
+            </div>
+        `;
+    });
+
+    // Health Check API
+    document.getElementById('healthCheckForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const responseBox = document.getElementById('healthCheckResponse');
+        const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
+        const statusText = form.closest('.card-body').querySelector('.status-text');
+
+        // Get form data
+        const formData = new FormData(form);
+        const data = {
+            lane_id: parseInt(formData.get('lane_id')),
+            device_id: parseInt(formData.get('device_id')),
+            device_type: formData.get('device_type'),
+            status: formData.get('status'),
+            last_heartbeat: new Date().toISOString(),
+            error_message: formData.get('error_message') || null
+        };
+
+        // Get external URL if provided
+        const externalUrl = formData.get('external_url');
+
+        try {
+            statusIndicator.className = 'status-indicator loading';
+            statusText.textContent = 'Sending...';
+
+            const response = await fetch(externalUrl || '/api/health/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+        }
+    });
+
+    // Lane Device Counts API
+    document.getElementById('getLaneDeviceCounts').addEventListener('click', async function() {
+        const responseBox = document.getElementById('laneDeviceCountsResponse');
+        const statusIndicator = responseBox.closest('.response-container').querySelector('.status-indicator');
+        const statusText = responseBox.closest('.response-container').querySelector('.status-text');
+        const lastUpdated = document.getElementById('lastUpdated');
+
+        try {
+            statusIndicator.className = 'status-indicator pending';
+            statusText.textContent = 'Fetching...';
+            responseBox.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Loading data...</div>';
+
+            const response = await fetch('/api/lane-device-counts');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            listenButton.style.display = 'inline-block';
-            stopListenButton.style.display = 'none';
-        });
+            const data = await response.json();
+
+            // Update the display
+            statusIndicator.className = 'status-indicator success';
+            statusText.textContent = 'Success';
+            lastUpdated.textContent = new Date().toLocaleTimeString();
+            
+            // Format the response with a nice layout
+            let htmlContent = `
+                <div class="alert alert-success mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Total Lanes:</strong> ${data.total_lanes || 0}
+                        </div>
+                        <div>
+                            <strong>Total Devices:</strong> ${data.total_devices || 0}
+                        </div>
+                    </div>
+                </div>`;
+
+            // Check if lane_details exists and is an array
+            if (Array.isArray(data.lane_details) && data.lane_details.length > 0) {
+                htmlContent += '<div class="lane-details">';
+                data.lane_details.forEach(lane => {
+                    htmlContent += `
+                        <div class="card mb-2">
+                            <div class="card-header py-2">
+                                <strong>Lane ${lane.lane_id}</strong> - ${lane.device_count || 0} Devices
+                            </div>
+                            <div class="card-body py-2">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Device ID</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+
+                    // Check if devices exists and is an array
+                    if (Array.isArray(lane.devices) && lane.devices.length > 0) {
+                        lane.devices.forEach(device => {
+                            htmlContent += `
+                                <tr>
+                                    <td>${device.device_id || 'N/A'}</td>
+                                    <td>${device.device_type || 'N/A'}</td>
+                                    <td>
+                                        <span class="badge ${device.status === 'healthy' ? 'bg-success' : 'bg-danger'}">
+                                            ${device.status || 'unknown'}
+                                        </span>
+                                    </td>
+                                </tr>`;
+                        });
+                    } else {
+                        htmlContent += `
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    No devices found for this lane
+                                </td>
+                            </tr>`;
+                    }
+
+                    htmlContent += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                htmlContent += '</div>';
+            } else {
+                htmlContent += `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No lane details available
+                    </div>`;
+            }
+
+            responseBox.innerHTML = htmlContent;
+        } catch (error) {
+            statusIndicator.className = 'status-indicator error';
+            statusText.textContent = 'Error';
+            responseBox.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error: ${error.message}
+                </div>
+            `;
+        }
     });
 });
+
+function testAddUser() {
+    const data = {
+        name: document.getElementById('userName').value,
+        designation: document.getElementById('userDesignation').value,
+        vehicle_number: document.getElementById('vehicleNumber').value,
+        fastag_id: document.getElementById('fastagId').value,
+        location_id: parseInt(document.getElementById('locationId').value),
+        kyc_document_type: document.getElementById('kycType').value,
+        kyc_document_number: document.getElementById('kycNumber').value,
+        valid_from: document.getElementById('validFrom').value,
+        valid_to: document.getElementById('validTo').value,
+        is_active: document.getElementById('isActive').value === 'true',
+        access_permissions: [
+            {
+                lane_id: parseInt(document.getElementById('permissionLaneId').value),
+                start_time: document.getElementById('startTime').value,
+                end_time: document.getElementById('endTime').value,
+                days_of_week: document.getElementById('daysOfWeek').value
+            }
+        ]
+    };
+
+    fetch('/api/users', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('addUserResponse').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        document.getElementById('addUserResponse').textContent = 'Error: ' + error.message;
+    });
+}
+
+function testEditUser() {
+    const userId = document.getElementById('editUserId').value;
+    const data = {
+        name: document.getElementById('editUserName').value,
+        designation: document.getElementById('editUserDesignation').value,
+        vehicle_number: document.getElementById('editVehicleNumber').value,
+        location_id: parseInt(document.getElementById('editLocationId').value),
+        is_active: document.getElementById('editIsActive').value === 'true'
+    };
+
+    fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('editUserResponse').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        document.getElementById('editUserResponse').textContent = 'Error: ' + error.message;
+    });
+}
 </script>
 {% endblock %}
