@@ -7,10 +7,19 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
                         <i class="fas fa-code me-2"></i>API Test Interface
                     </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="apiVersionDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-code-branch me-2"></i>v1.0
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" data-version="v1.0">v1.0 (Current)</a></li>
+                            <li><a class="dropdown-item" href="#" data-version="v0.9">v0.9 (Legacy)</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -35,31 +44,37 @@
                                 <div class="api-section" id="vehicle-presence">
                                     <h5 class="mb-3">Vehicle Presence API</h5>
                                     <div class="alert alert-info">
-                                        <h6 class="alert-heading">Endpoint</h6>
-                                        <p class="mb-0">POST http://192.168.1.3:5000/api/vehicle/presence</p>
+                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                                        <p class="mb-0">Send vehicle presence data to this endpoint:</p>
+                                        <div class="bg-light p-2 rounded mt-2">
+                                            <code>POST http://192.168.1.3:5000/api/vehicle/presence</code>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Request Format</h6>
+                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "lane_id": "L1",
     "device_id": "D1",
     "timestamp": "2024-02-20T10:30:00Z",
-    "presence": true
+    "presence": true,
+    "confidence": 0.95
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Example cURL</h6>
+                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
                                         <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/vehicle/presence \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
     -d '{
         "lane_id": "L1",
         "device_id": "D1",
         "timestamp": "2024-02-20T10:30:00Z",
-        "presence": true
+        "presence": true,
+        "confidence": 0.95
     }'</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Expected Response</h6>
+                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "success": true,
     "message": "Vehicle presence recorded",
@@ -67,17 +82,21 @@
         "lane_id": "L1",
         "device_id": "D1",
         "timestamp": "2024-02-20T10:30:00Z",
-        "presence": true
+        "presence": true,
+        "confidence": 0.95,
+        "status": "active"
     }
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Important Notes</h6>
+                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
                                         <ul class="list-unstyled">
                                             <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Lane ID must be a valid lane identifier</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Device ID must be a valid device identifier</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Confidence must be between 0 and 1</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -85,35 +104,43 @@
                                 <div class="api-section" id="vehicle-anpr" style="display: none;">
                                     <h5 class="mb-3">Vehicle ANPR API</h5>
                                     <div class="alert alert-info">
-                                        <h6 class="alert-heading">Endpoint</h6>
-                                        <p class="mb-0">POST http://192.168.1.3:5000/api/vehicle/anpr</p>
+                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                                        <p class="mb-0">Send ANPR (Automatic Number Plate Recognition) data to this endpoint:</p>
+                                        <div class="bg-light p-2 rounded mt-2">
+                                            <code>POST http://192.168.1.3:5000/api/vehicle/anpr</code>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Request Format</h6>
+                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "lane_id": "L1",
     "device_id": "D1",
     "timestamp": "2024-02-20T10:30:00Z",
     "image_url": "http://example.com/image.jpg",
     "plate_number": "ABC123",
-    "confidence": 0.95
+    "confidence": 0.95,
+    "vehicle_type": "car",
+    "vehicle_color": "white"
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Example cURL</h6>
+                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
                                         <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/vehicle/anpr \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
     -d '{
         "lane_id": "L1",
         "device_id": "D1",
         "timestamp": "2024-02-20T10:30:00Z",
         "image_url": "http://example.com/image.jpg",
         "plate_number": "ABC123",
-        "confidence": 0.95
+        "confidence": 0.95,
+        "vehicle_type": "car",
+        "vehicle_color": "white"
     }'</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Expected Response</h6>
+                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "success": true,
     "message": "ANPR data recorded",
@@ -123,17 +150,25 @@
         "timestamp": "2024-02-20T10:30:00Z",
         "plate_number": "ABC123",
         "confidence": 0.95,
-        "access_granted": true
+        "vehicle_type": "car",
+        "vehicle_color": "white",
+        "access_granted": true,
+        "user_details": {
+            "name": "John Doe",
+            "valid_until": "2024-12-31"
+        }
     }
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Important Notes</h6>
+                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
                                         <ul class="list-unstyled">
                                             <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Image URL must be accessible</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Confidence must be between 0 and 1</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Vehicle type must be one of: car, truck, bus, motorcycle</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -141,31 +176,39 @@
                                 <div class="api-section" id="barrier-control" style="display: none;">
                                     <h5 class="mb-3">Barrier Control API</h5>
                                     <div class="alert alert-info">
-                                        <h6 class="alert-heading">Endpoint</h6>
-                                        <p class="mb-0">POST http://192.168.1.3:5000/api/barrier/control</p>
+                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                                        <p class="mb-0">Send barrier control commands to this endpoint:</p>
+                                        <div class="bg-light p-2 rounded mt-2">
+                                            <code>POST http://192.168.1.3:5000/api/barrier/control</code>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Request Format</h6>
+                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "lane_id": "L1",
     "device_id": "D1",
     "action": "open",
-    "timestamp": "2024-02-20T10:30:00Z"
+    "timestamp": "2024-02-20T10:30:00Z",
+    "reason": "authorized_access",
+    "operator_id": "OP001"
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Example cURL</h6>
+                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
                                         <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/barrier/control \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
     -d '{
         "lane_id": "L1",
         "device_id": "D1",
         "action": "open",
-        "timestamp": "2024-02-20T10:30:00Z"
+        "timestamp": "2024-02-20T10:30:00Z",
+        "reason": "authorized_access",
+        "operator_id": "OP001"
     }'</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Expected Response</h6>
+                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "success": true,
     "message": "Barrier command received",
@@ -174,17 +217,21 @@
         "device_id": "D1",
         "action": "open",
         "timestamp": "2024-02-20T10:30:00Z",
-        "status": "executing"
+        "status": "executing",
+        "command_id": "CMD123456",
+        "estimated_completion": "2024-02-20T10:30:05Z"
     }
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Important Notes</h6>
+                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
                                         <ul class="list-unstyled">
                                             <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Action must be either "open" or "close"</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Timestamp must be in ISO 8601 format</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Device must be online and accessible</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Reason must be one of: authorized_access, maintenance, emergency, manual_override</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -192,35 +239,51 @@
                                 <div class="api-section" id="health-check" style="display: none;">
                                     <h5 class="mb-3">Health Check API</h5>
                                     <div class="alert alert-info">
-                                        <h6 class="alert-heading">Endpoint</h6>
-                                        <p class="mb-0">POST http://192.168.1.3:5000/api/health/check</p>
+                                        <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>About This API</h6>
+                                        <p class="mb-0">Send device health status updates to this endpoint:</p>
+                                        <div class="bg-light p-2 rounded mt-2">
+                                            <code>POST http://192.168.1.3:5000/api/health/check</code>
+                                        </div>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Request Format</h6>
+                                        <h6><i class="fas fa-file-code me-2"></i>Request Format</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "lane_id": "L1",
     "device_id": "D1",
     "device_type": "barrier",
     "status": "online",
     "last_heartbeat": "2024-02-20T10:30:00Z",
-    "error_message": null
+    "error_message": null,
+    "metrics": {
+        "cpu_usage": 45.2,
+        "memory_usage": 60.8,
+        "temperature": 35.6,
+        "uptime": 86400
+    }
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Example cURL</h6>
+                                        <h6><i class="fas fa-terminal me-2"></i>Example cURL</h6>
                                         <pre class="bg-light p-3 rounded"><code>curl -X POST http://192.168.1.3:5000/api/health/check \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer YOUR_API_KEY" \
     -d '{
         "lane_id": "L1",
         "device_id": "D1",
         "device_type": "barrier",
         "status": "online",
         "last_heartbeat": "2024-02-20T10:30:00Z",
-        "error_message": null
+        "error_message": null,
+        "metrics": {
+            "cpu_usage": 45.2,
+            "memory_usage": 60.8,
+            "temperature": 35.6,
+            "uptime": 86400
+        }
     }'</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Expected Response</h6>
+                                        <h6><i class="fas fa-reply me-2"></i>Expected Response</h6>
                                         <pre class="bg-light p-3 rounded"><code>{
     "success": true,
     "message": "Health check received",
@@ -230,17 +293,30 @@
         "device_type": "barrier",
         "status": "online",
         "last_heartbeat": "2024-02-20T10:30:00Z",
-        "error_message": null
+        "error_message": null,
+        "metrics": {
+            "cpu_usage": 45.2,
+            "memory_usage": 60.8,
+            "temperature": 35.6,
+            "uptime": 86400
+        },
+        "health_score": 95,
+        "recommendations": [
+            "System performing well",
+            "No maintenance required"
+        ]
     }
 }</code></pre>
                                     </div>
                                     <div class="mb-3">
-                                        <h6>Important Notes</h6>
+                                        <h6><i class="fas fa-exclamation-circle me-2"></i>Important Notes</h6>
                                         <ul class="list-unstyled">
                                             <li><i class="fas fa-check-circle text-success me-2"></i>All fields are required</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Device type must be one of: barrier, camera, sensor</li>
-                                            <li><i class="fas fa-check-circle text-success me-2"></i>Status must be one of: online, offline, error</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Status must be one of: online, offline, error, maintenance</li>
                                             <li><i class="fas fa-check-circle text-success me-2"></i>Last heartbeat must be in ISO 8601 format</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>Metrics are optional but recommended</li>
+                                            <li><i class="fas fa-check-circle text-success me-2"></i>API key must be included in Authorization header</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -257,6 +333,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const apiList = document.getElementById('api-list');
     const apiSections = document.querySelectorAll('.api-section');
+    const apiVersionDropdown = document.getElementById('apiVersionDropdown');
 
     apiList.addEventListener('click', function(e) {
         e.preventDefault();
@@ -274,6 +351,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 section.style.display = section.id === apiId ? 'block' : 'none';
             });
         }
+    });
+
+    apiVersionDropdown.addEventListener('click', function(e) {
+        e.preventDefault();
     });
 });
 </script>
