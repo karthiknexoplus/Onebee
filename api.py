@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_restx import Api, Resource, fields
-from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog, BarrierLog
+from models import db, Lane, Device, AccessLog, VehicleUser, UserAccessPermission, PresenceLog, BarrierLog, Location
 from datetime import datetime
 import json
 from functools import wraps
@@ -272,6 +272,47 @@ class VehiclePresence(Resource):
             return {
                 'message': 'Vehicle presence recorded successfully',
                 'status': log.status
+            }, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': str(e)}, 400
+
+@vehicle_ns.route('/presence/reset')
+class VehiclePresenceReset(Resource):
+    @vehicle_ns.expect(reset_model)
+    @vehicle_ns.doc(responses={
+        200: 'Vehicle presence logs reset successfully',
+        400: 'Invalid input',
+        404: 'Lane or device not found'
+    })
+    @vehicle_ns.doc(description='Reset vehicle presence logs for a specific lane and device',
+                   example={
+                       'lane_id': 1,
+                       'device_id': 1,
+                       'timestamp': '2024-04-08T10:00:00'
+                   })
+    def post(self):
+        """Reset vehicle presence logs"""
+        try:
+            data = request.json
+            lane = Lane.query.get(data['lane_id'])
+            device = Device.query.get(data['device_id'])
+            
+            if not lane or not device:
+                return {'message': 'Lane or device not found'}, 404
+            
+            # Delete all presence logs for this lane and device
+            PresenceLog.query.filter_by(
+                lane_id=lane.id,
+                device_id=device.id
+            ).delete()
+            
+            db.session.commit()
+            
+            return {
+                'message': 'Vehicle presence logs reset successfully',
+                'lane_id': lane.id,
+                'device_id': device.id
             }, 200
         except Exception as e:
             db.session.rollback()
@@ -708,4 +749,203 @@ class UserManagementById(Resource):
             return {
                 'status': 'error',
                 'message': f'Error updating user: {str(e)}'
+            }, 500 
+
+@api.route('/locations')
+class LocationList(Resource):
+    @no_auth_required
+    @api.doc('get_locations')
+    def get(self):
+        """Get all locations"""
+        try:
+            locations = Location.query.all()
+            return {
+                'status': 'success',
+                'data': [{
+                    'id': loc.id,
+                    'name': loc.name,
+                    'address': loc.address,
+                    'is_active': loc.is_active,
+                    'lanes': [{
+                        'id': lane.id,
+                        'name': lane.name,
+                        'lane_type': lane.lane_type,
+                        'status': lane.status
+                    } for lane in loc.lanes]
+                } for loc in locations]
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving locations: {str(e)}'
+            }, 500
+
+@api.route('/locations/<int:location_id>')
+class LocationDetail(Resource):
+    @no_auth_required
+    @api.doc('get_location')
+    def get(self, location_id):
+        """Get a specific location"""
+        try:
+            location = Location.query.get_or_404(location_id)
+            return {
+                'status': 'success',
+                'data': {
+                    'id': location.id,
+                    'name': location.name,
+                    'address': location.address,
+                    'is_active': location.is_active,
+                    'lanes': [{
+                        'id': lane.id,
+                        'name': lane.name,
+                        'lane_type': lane.lane_type,
+                        'status': lane.status
+                    } for lane in location.lanes]
+                }
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving location: {str(e)}'
+            }, 500
+
+@api.route('/lanes')
+class LaneList(Resource):
+    @no_auth_required
+    @api.doc('get_lanes')
+    def get(self):
+        """Get all lanes"""
+        try:
+            lanes = Lane.query.all()
+            return {
+                'status': 'success',
+                'data': [{
+                    'id': lane.id,
+                    'name': lane.name,
+                    'lane_type': lane.lane_type,
+                    'status': lane.status,
+                    'location_id': lane.location_id,
+                    'devices': [{
+                        'id': device.id,
+                        'name': device.name,
+                        'device_type': device.device_type,
+                        'status': device.status
+                    } for device in lane.devices]
+                } for lane in lanes]
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving lanes: {str(e)}'
+            }, 500
+
+@api.route('/lanes/<int:lane_id>')
+class LaneDetail(Resource):
+    @no_auth_required
+    @api.doc('get_lane')
+    def get(self, lane_id):
+        """Get a specific lane"""
+        try:
+            lane = Lane.query.get_or_404(lane_id)
+            return {
+                'status': 'success',
+                'data': {
+                    'id': lane.id,
+                    'name': lane.name,
+                    'lane_type': lane.lane_type,
+                    'status': lane.status,
+                    'location_id': lane.location_id,
+                    'devices': [{
+                        'id': device.id,
+                        'name': device.name,
+                        'device_type': device.device_type,
+                        'status': device.status
+                    } for device in lane.devices]
+                }
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving lane: {str(e)}'
+            }, 500
+
+@api.route('/users')
+class UserList(Resource):
+    @no_auth_required
+    @api.doc('get_users')
+    def get(self):
+        """Get all users"""
+        try:
+            users = VehicleUser.query.all()
+            return {
+                'status': 'success',
+                'data': [{
+                    'id': user.id,
+                    'name': user.name,
+                    'vehicle_number': user.vehicle_number,
+                    'fastag_id': user.fastag_id,
+                    'location_id': user.location_id,
+                    'is_active': user.is_active
+                } for user in users]
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving users: {str(e)}'
+            }, 500
+
+@api.route('/users/<int:user_id>')
+class UserDetail(Resource):
+    @no_auth_required
+    @api.doc('get_user')
+    def get(self, user_id):
+        """Get a specific user"""
+        try:
+            user = VehicleUser.query.get_or_404(user_id)
+            return {
+                'status': 'success',
+                'data': {
+                    'id': user.id,
+                    'name': user.name,
+                    'vehicle_number': user.vehicle_number,
+                    'fastag_id': user.fastag_id,
+                    'location_id': user.location_id,
+                    'is_active': user.is_active,
+                    'access_permissions': [{
+                        'lane_id': p.lane_id,
+                        'start_time': p.start_time.strftime('%H:%M') if p.start_time else None,
+                        'end_time': p.end_time.strftime('%H:%M') if p.end_time else None,
+                        'days_of_week': p.days_of_week
+                    } for p in user.access_permissions]
+                }
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving user: {str(e)}'
+            }, 500
+
+@api.route('/lanes/<int:lane_id>/devices')
+class LaneDevices(Resource):
+    @no_auth_required
+    @api.doc('get_lane_devices')
+    def get(self, lane_id):
+        """Get all devices for a specific lane"""
+        try:
+            lane = Lane.query.get_or_404(lane_id)
+            return {
+                'status': 'success',
+                'data': [{
+                    'id': device.id,
+                    'name': device.name,
+                    'device_type': device.device_type,
+                    'status': device.status,
+                    'ip_address': device.ip_address,
+                    'port': device.port
+                } for device in lane.devices]
+            }
+        except Exception as e:
+            return {
+                'status': 'error',
+                'message': f'Error retrieving lane devices: {str(e)}'
             }, 500 
