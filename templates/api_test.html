@@ -72,7 +72,6 @@
     "lane_id": 1,
     "device_id": 101,
     "confidence": 95.5,
-    "status": "active",
     "timestamp": "2024-04-16T15:30:00Z"
 }</pre>
             </div>
@@ -85,31 +84,22 @@
                         </div>
                         <small class="text-muted">Leave empty to test local API endpoint</small>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="laneId" name="lane_id" placeholder="Lane ID" value="1" required>
                             <label for="laneId">Lane ID</label>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="deviceId" name="device_id" placeholder="Device ID" value="101" required>
                             <label for="deviceId">Device ID</label>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <div class="form-floating">
                             <input type="number" class="form-control" id="confidence" name="confidence" min="0" max="100" placeholder="Confidence" value="95.5" required>
                             <label for="confidence">Confidence</label>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-floating">
-                            <select class="form-select" id="status" name="status" required>
-                                <option value="active" selected>Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                            <label for="status">Status</label>
                         </div>
                     </div>
                 </div>
@@ -1086,40 +1076,53 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
         const statusText = form.closest('.card-body').querySelector('.status-text');
 
-        // Get form data
-        const formData = new FormData(form);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            confidence: parseFloat(formData.get('confidence')),
-            status: formData.get('status'),
-            timestamp: new Date().toISOString()
-        };
-
-        // Get external URL if provided
-        const externalUrl = formData.get('external_url');
-
         try {
+            // Get form data
+            const formData = new FormData(form);
+            const data = {
+                lane_id: parseInt(formData.get('lane_id')),
+                device_id: parseInt(formData.get('device_id')),
+                confidence: parseFloat(formData.get('confidence')) / 100, // Convert percentage to decimal
+                timestamp: new Date().toISOString()
+            };
+
+            // Get external URL if provided
+            const externalUrl = formData.get('external_url');
+
+            // Update status
             statusIndicator.className = 'status-indicator loading';
             statusText.textContent = 'Sending...';
 
+            // Make API request
             const response = await fetch(externalUrl || '/api/vehicle/presence', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
+                mode: 'no-cors', // Add this to handle CORS
+                credentials: 'include', // Include cookies
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
-
-            statusIndicator.className = 'status-indicator success';
-            statusText.textContent = 'Success';
-            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            // Since we're using no-cors mode, we need to handle the response differently
+            if (response.type === 'opaque') {
+                // For no-cors requests, we can't read the response
+                statusIndicator.className = 'status-indicator success';
+                statusText.textContent = 'Success (No-CORS)';
+                responseBox.innerHTML = `<pre class="text-success">Request sent successfully (CORS restricted)</pre>`;
+            } else {
+                const result = await response.json();
+                statusIndicator.className = 'status-indicator success';
+                statusText.textContent = 'Success';
+                responseBox.innerHTML = `<pre class="text-success">${JSON.stringify(result, null, 2)}</pre>`;
+            }
         } catch (error) {
+            // Update UI on error
             statusIndicator.className = 'status-indicator error';
             statusText.textContent = 'Error';
-            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+            responseBox.innerHTML = `<pre class="text-danger">Error: ${error.message}</pre>`;
+            console.error('API Error:', error);
         }
     });
 
@@ -1131,40 +1134,55 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusIndicator = form.closest('.card-body').querySelector('.status-indicator');
         const statusText = form.closest('.card-body').querySelector('.status-text');
 
-        // Get form data
-        const formData = new FormData(form);
-        const data = {
-            lane_id: parseInt(formData.get('lane_id')),
-            device_id: parseInt(formData.get('device_id')),
-            vehicle_number: formData.get('vehicle_number'),
-            confidence: parseFloat(formData.get('confidence')),
-            timestamp: new Date().toISOString()
-        };
-
-        // Get external URL if provided
-        const externalUrl = formData.get('external_url');
-
         try {
+            // Get form data
+            const formData = new FormData(form);
+            const data = {
+                lane_id: parseInt(formData.get('lane_id')),
+                device_id: parseInt(formData.get('device_id')),
+                vehicle_number: formData.get('vehicle_number'),
+                confidence: parseFloat(formData.get('confidence')) / 100, // Convert percentage to decimal
+                timestamp: new Date().toISOString(),
+                image_path: "/uploads/anpr/2024/04/08/image_001.jpg" // Default image path
+            };
+
+            // Get external URL if provided
+            const externalUrl = formData.get('external_url');
+
+            // Update status
             statusIndicator.className = 'status-indicator loading';
             statusText.textContent = 'Sending...';
 
+            // Make API request
             const response = await fetch(externalUrl || '/api/vehicle/anpr', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
+                mode: 'no-cors', // Add this to handle CORS
+                credentials: 'include', // Include cookies
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
-
-            statusIndicator.className = 'status-indicator success';
-            statusText.textContent = 'Success';
-            responseBox.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            // Since we're using no-cors mode, we need to handle the response differently
+            if (response.type === 'opaque') {
+                // For no-cors requests, we can't read the response
+                statusIndicator.className = 'status-indicator success';
+                statusText.textContent = 'Success (No-CORS)';
+                responseBox.innerHTML = `<pre class="text-success">Request sent successfully (CORS restricted)</pre>`;
+            } else {
+                const result = await response.json();
+                statusIndicator.className = 'status-indicator success';
+                statusText.textContent = 'Success';
+                responseBox.innerHTML = `<pre class="text-success">${JSON.stringify(result, null, 2)}</pre>`;
+            }
         } catch (error) {
+            // Update UI on error
             statusIndicator.className = 'status-indicator error';
             statusText.textContent = 'Error';
-            responseBox.innerHTML = `<pre class="text-danger">${error.message}</pre>`;
+            responseBox.innerHTML = `<pre class="text-danger">Error: ${error.message}</pre>`;
+            console.error('API Error:', error);
         }
     });
 

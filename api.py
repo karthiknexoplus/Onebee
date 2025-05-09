@@ -9,157 +9,26 @@ from flask_login import current_user
 # Create Blueprint
 api_bp = Blueprint('api', __name__)
 
+# Initialize Flask-RESTX API
+api = Api(api_bp,
+    version='1.0',
+    title='Access Control API',
+    description='API for managing access control system',
+    doc='/docs'
+)
+
 # Disable CSRF for API routes
 @api_bp.before_request
 def disable_csrf():
     pass
 
-api = Api(api_bp, 
-    version='1.0', 
-    title='Access Control API',
-    description='API for vehicle access control system',
-    doc='/docs',  # Change the documentation URL to /docs
-    # Customize Swagger UI theme
-    template='''
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Access Control API Documentation</title>
-        <link rel="icon" type="image/png" href="/static/images/logo.png">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-        <style>
-            body {
-                background-color: #f8f9fa;
-            }
-            .swagger-ui .topbar {
-                background-color: #343a40;
-            }
-            .swagger-ui .info .title {
-                color: #343a40;
-            }
-            .swagger-ui .opblock.opblock-post {
-                border-color: #28a745;
-                background: rgba(40, 167, 69, 0.1);
-            }
-            .swagger-ui .opblock.opblock-get {
-                border-color: #007bff;
-                background: rgba(0, 123, 255, 0.1);
-            }
-            .swagger-ui .btn.execute {
-                background-color: #28a745;
-            }
-            .swagger-ui .btn.authorize {
-                background-color: #343a40;
-            }
-            .swagger-ui .opblock .opblock-summary-method {
-                background: #343a40;
-            }
-            .external-url-input {
-                margin: 10px 0;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                width: 100%;
-            }
-            .url-input-container {
-                margin: 10px 0;
-                padding: 10px;
-                background: #f8f9fa;
-                border-radius: 4px;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="swagger-ui"></div>
-        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
-        <script>
-            window.onload = function() {
-                const ui = SwaggerUIBundle({
-                    url: "/api/swagger.json",
-                    dom_id: '#swagger-ui',
-                    deepLinking: true,
-                    presets: [
-                        SwaggerUIBundle.presets.apis,
-                        SwaggerUIStandalonePreset
-                    ],
-                    plugins: [
-                        SwaggerUIBundle.plugins.DownloadUrl
-                    ],
-                    layout: "StandaloneLayout",
-                    docExpansion: "list",
-                    defaultModelsExpandDepth: -1,
-                    onComplete: function() {
-                        // Add URL input field for Vehicle Presence API
-                        const vehiclePresenceOp = document.querySelector('.opblock[data-path="/vehicle/presence"]');
-                        if (vehiclePresenceOp) {
-                            const executeDiv = vehiclePresenceOp.querySelector('.execute-wrapper');
-                            if (executeDiv) {
-                                const urlInputContainer = document.createElement('div');
-                                urlInputContainer.className = 'url-input-container';
-                                urlInputContainer.innerHTML = `
-                                    <label for="external-url">External Server URL:</label>
-                                    <input type="text" id="external-url" class="external-url-input" 
-                                           placeholder="Enter external server URL (e.g., http://external-server.com/api/vehicle/presence)">
-                                `;
-                                executeDiv.parentNode.insertBefore(urlInputContainer, executeDiv);
-
-                                // Override the execute button click
-                                const executeBtn = executeDiv.querySelector('.btn.execute');
-                                if (executeBtn) {
-                                    const originalClick = executeBtn.onclick;
-                                    executeBtn.onclick = function(e) {
-                                        const externalUrl = document.getElementById('external-url').value;
-                                        if (externalUrl) {
-                                            // Get the request body
-                                            const requestBody = vehiclePresenceOp.querySelector('.body-param__example textarea').value;
-                                            
-                                            // Send request to external URL
-                                            fetch(externalUrl, {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: requestBody
-                                            })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                // Update the response section
-                                                const responseDiv = vehiclePresenceOp.querySelector('.responses-wrapper');
-                                                if (responseDiv) {
-                                                    const responseBody = responseDiv.querySelector('.highlight-code');
-                                                    if (responseBody) {
-                                                        responseBody.textContent = JSON.stringify(data, null, 2);
-                                                    }
-                                                }
-                                            })
-                                            .catch(error => {
-                                                console.error('Error:', error);
-                                                alert('Error sending request to external server: ' + error.message);
-                                            });
-                                        } else {
-                                            // Use original behavior if no external URL
-                                            originalClick.call(this, e);
-                                        }
-                                    };
-                                }
-                            }
-                        }
-                    }
-                });
-                window.ui = ui;
-            };
-        </script>
-    </body>
-    </html>
-    '''
-)
-
 # Create namespaces
 vehicle_ns = api.namespace('vehicle', description='Vehicle detection and ANPR operations')
 barrier_ns = api.namespace('barrier', description='Barrier control operations')
 health_ns = api.namespace('health', description='Hardware health check operations')
+location_ns = api.namespace('locations', description='Location management operations')
+lane_ns = api.namespace('lanes', description='Lane management operations')
+user_ns = api.namespace('users', description='User management operations')
 
 # Define models for Swagger documentation
 vehicle_presence_model = api.model('VehiclePresence', {
@@ -185,6 +54,30 @@ barrier_control_model = api.model('BarrierControl', {
     'timestamp': fields.DateTime(required=True, description='Command timestamp')
 })
 
+location_model = api.model('Location', {
+    'id': fields.Integer(description='Location ID'),
+    'name': fields.String(required=True, description='Location name'),
+    'address': fields.String(description='Location address'),
+    'is_active': fields.Boolean(description='Location status')
+})
+
+lane_model = api.model('Lane', {
+    'id': fields.Integer(description='Lane ID'),
+    'name': fields.String(required=True, description='Lane name'),
+    'lane_type': fields.String(required=True, description='Lane type (entry/exit)'),
+    'status': fields.String(description='Lane status'),
+    'location_id': fields.Integer(required=True, description='Associated location ID')
+})
+
+user_model = api.model('User', {
+    'id': fields.Integer(description='User ID'),
+    'name': fields.String(required=True, description='User name'),
+    'vehicle_number': fields.String(required=True, description='Vehicle number'),
+    'fastag_id': fields.String(description='Fastag ID'),
+    'location_id': fields.Integer(required=True, description='Associated location ID'),
+    'is_active': fields.Boolean(description='User status')
+})
+
 health_check_model = api.model('HealthCheck', {
     'lane_id': fields.Integer(required=True, description='ID of the lane'),
     'device_id': fields.Integer(required=True, description='ID of the device'),
@@ -204,26 +97,6 @@ success_model = api.model('Success', {
     'status': fields.String(required=True, description='Status of the operation'),
     'message': fields.String(required=True, description='Message describing the result'),
     'data': fields.Raw(description='Response data')
-})
-
-# Define user model for Swagger documentation
-user_model = api.model('User', {
-    'name': fields.String(required=True, description='Full name of the user'),
-    'designation': fields.String(required=True, description='User designation'),
-    'vehicle_number': fields.String(required=True, description='Vehicle registration number'),
-    'fastag_id': fields.String(required=True, description='Fastag ID'),
-    'location_id': fields.Integer(required=True, description='Location ID'),
-    'kyc_document_type': fields.String(required=True, description='Type of KYC document'),
-    'kyc_document_number': fields.String(required=True, description='KYC document number'),
-    'valid_from': fields.Date(required=True, description='Validity start date'),
-    'valid_to': fields.Date(required=True, description='Validity end date'),
-    'is_active': fields.Boolean(required=True, description='User status'),
-    'access_permissions': fields.List(fields.Nested(api.model('AccessPermission', {
-        'lane_id': fields.Integer(required=True, description='Lane ID'),
-        'start_time': fields.String(required=True, description='Access start time'),
-        'end_time': fields.String(required=True, description='Access end time'),
-        'days_of_week': fields.String(required=True, description='Days of week (1-7, comma-separated)')
-    })))
 })
 
 def no_auth_required(f):
@@ -751,201 +624,99 @@ class UserManagementById(Resource):
                 'message': f'Error updating user: {str(e)}'
             }, 500 
 
-@api.route('/locations')
+@location_ns.route('')
 class LocationList(Resource):
-    @no_auth_required
-    @api.doc('get_locations')
+    @location_ns.doc('list_locations')
+    @location_ns.marshal_list_with(location_model)
     def get(self):
-        """Get all locations"""
+        """List all locations"""
         try:
             locations = Location.query.all()
-            return {
-                'status': 'success',
-                'data': [{
-                    'id': loc.id,
-                    'name': loc.name,
-                    'address': loc.address,
-                    'is_active': loc.is_active,
-                    'lanes': [{
-                        'id': lane.id,
-                        'name': lane.name,
-                        'lane_type': lane.lane_type,
-                        'status': lane.status
-                    } for lane in loc.lanes]
-                } for loc in locations]
-            }
+            return locations
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving locations: {str(e)}'
-            }, 500
+            return {'message': str(e)}, 500
 
-@api.route('/locations/<int:location_id>')
+@location_ns.route('/<int:location_id>')
+@location_ns.param('location_id', 'The location identifier')
 class LocationDetail(Resource):
-    @no_auth_required
-    @api.doc('get_location')
+    @location_ns.doc('get_location')
+    @location_ns.marshal_with(location_model)
     def get(self, location_id):
         """Get a specific location"""
         try:
             location = Location.query.get_or_404(location_id)
-            return {
-                'status': 'success',
-                'data': {
-                    'id': location.id,
-                    'name': location.name,
-                    'address': location.address,
-                    'is_active': location.is_active,
-                    'lanes': [{
-                        'id': lane.id,
-                        'name': lane.name,
-                        'lane_type': lane.lane_type,
-                        'status': lane.status
-                    } for lane in location.lanes]
-                }
-            }
+            return location
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving location: {str(e)}'
-            }, 500
+            return {'message': str(e)}, 500
 
-@api.route('/lanes')
+@lane_ns.route('')
 class LaneList(Resource):
-    @no_auth_required
-    @api.doc('get_lanes')
+    @lane_ns.doc('list_lanes')
+    @lane_ns.marshal_list_with(lane_model)
     def get(self):
-        """Get all lanes"""
+        """List all lanes"""
         try:
             lanes = Lane.query.all()
-            return {
-                'status': 'success',
-                'data': [{
-                    'id': lane.id,
-                    'name': lane.name,
-                    'lane_type': lane.lane_type,
-                    'status': lane.status,
-                    'location_id': lane.location_id,
-                    'devices': [{
-                        'id': device.id,
-                        'name': device.name,
-                        'device_type': device.device_type,
-                        'status': device.status
-                    } for device in lane.devices]
-                } for lane in lanes]
-            }
+            return lanes
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving lanes: {str(e)}'
-            }, 500
+            return {'message': str(e)}, 500
 
-@api.route('/lanes/<int:lane_id>')
+@lane_ns.route('/<int:lane_id>')
+@lane_ns.param('lane_id', 'The lane identifier')
 class LaneDetail(Resource):
-    @no_auth_required
-    @api.doc('get_lane')
+    @lane_ns.doc('get_lane')
+    @lane_ns.marshal_with(lane_model)
     def get(self, lane_id):
         """Get a specific lane"""
         try:
             lane = Lane.query.get_or_404(lane_id)
+            return lane
+        except Exception as e:
+            return {'message': str(e)}, 500
+
+@lane_ns.route('/<int:lane_id>/devices')
+@lane_ns.param('lane_id', 'The lane identifier')
+class LaneDevices(Resource):
+    @lane_ns.doc('get_lane_devices')
+    def get(self, lane_id):
+        """Get devices for a specific lane"""
+        try:
+            lane = Lane.query.get_or_404(lane_id)
+            devices = Device.query.filter_by(lane_id=lane_id).all()
             return {
-                'status': 'success',
-                'data': {
-                    'id': lane.id,
-                    'name': lane.name,
-                    'lane_type': lane.lane_type,
-                    'status': lane.status,
-                    'location_id': lane.location_id,
-                    'devices': [{
-                        'id': device.id,
-                        'name': device.name,
-                        'device_type': device.device_type,
-                        'status': device.status
-                    } for device in lane.devices]
-                }
+                'lane_id': lane_id,
+                'lane_name': lane.name,
+                'devices': [{
+                    'id': device.id,
+                    'name': device.name,
+                    'device_type': device.device_type,
+                    'status': device.status
+                } for device in devices]
             }
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving lane: {str(e)}'
-            }, 500
+            return {'message': str(e)}, 500
 
-@api.route('/users')
+@user_ns.route('')
 class UserList(Resource):
-    @no_auth_required
-    @api.doc('get_users')
+    @user_ns.doc('list_users')
+    @user_ns.marshal_list_with(user_model)
     def get(self):
-        """Get all users"""
+        """List all users"""
         try:
             users = VehicleUser.query.all()
-            return {
-                'status': 'success',
-                'data': [{
-                    'id': user.id,
-                    'name': user.name,
-                    'vehicle_number': user.vehicle_number,
-                    'fastag_id': user.fastag_id,
-                    'location_id': user.location_id,
-                    'is_active': user.is_active
-                } for user in users]
-            }
+            return users
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving users: {str(e)}'
-            }, 500
+            return {'message': str(e)}, 500
 
-@api.route('/users/<int:user_id>')
+@user_ns.route('/<int:user_id>')
+@user_ns.param('user_id', 'The user identifier')
 class UserDetail(Resource):
-    @no_auth_required
-    @api.doc('get_user')
+    @user_ns.doc('get_user')
+    @user_ns.marshal_with(user_model)
     def get(self, user_id):
         """Get a specific user"""
         try:
             user = VehicleUser.query.get_or_404(user_id)
-            return {
-                'status': 'success',
-                'data': {
-                    'id': user.id,
-                    'name': user.name,
-                    'vehicle_number': user.vehicle_number,
-                    'fastag_id': user.fastag_id,
-                    'location_id': user.location_id,
-                    'is_active': user.is_active,
-                    'access_permissions': [{
-                        'lane_id': p.lane_id,
-                        'start_time': p.start_time.strftime('%H:%M') if p.start_time else None,
-                        'end_time': p.end_time.strftime('%H:%M') if p.end_time else None,
-                        'days_of_week': p.days_of_week
-                    } for p in user.access_permissions]
-                }
-            }
+            return user
         except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving user: {str(e)}'
-            }, 500
-
-@api.route('/lanes/<int:lane_id>/devices')
-class LaneDevices(Resource):
-    @no_auth_required
-    @api.doc('get_lane_devices')
-    def get(self, lane_id):
-        """Get all devices for a specific lane"""
-        try:
-            lane = Lane.query.get_or_404(lane_id)
-            return {
-                'status': 'success',
-                'data': [{
-                    'id': device.id,
-                    'name': device.name,
-                    'device_type': device.device_type,
-                    'status': device.status,
-                    'ip_address': device.ip_address,
-                    'port': device.port
-                } for device in lane.devices]
-            }
-        except Exception as e:
-            return {
-                'status': 'error',
-                'message': f'Error retrieving lane devices: {str(e)}'
-            }, 500 
+            return {'message': str(e)}, 500 
